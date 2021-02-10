@@ -19,11 +19,25 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/common/types.h>
+#ifndef PRIVATE_CONFIG_JSON_H_
+#define PRIVATE_CONFIG_JSON_H_
 
-#ifndef LSP_IDE_DEBUG
-    int main(int argc, const char **argv)
-    {
-        return 0;
-    }
-#endif /* LSP_IDE_DEBUG */
+#include <private/config/config.h>
+#include <lsp-plug.in/io/IInSequence.h>
+
+namespace timbremill
+{
+    using namespace lsp;
+
+    /**
+     * Parse configuration file in JSON format
+     *
+     * @param cfg configuration to update
+     * @param is input stream
+     * @return status of operation
+     */
+    status_t parse_json_config(config_t *cfg, io::IInSequence *is);
+
+}
+
+#endif /* PRIVATE_CONFIG_JSON_H_ */

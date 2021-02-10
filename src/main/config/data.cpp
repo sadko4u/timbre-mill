@@ -3,7 +3,7 @@
  *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 10 февр. 2021 г.
+ * Created on: 11 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,11 +19,46 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/common/types.h>
+#include <private/config/data.h>
 
-#ifndef LSP_IDE_DEBUG
-    int main(int argc, const char **argv)
+namespace timbremill
+{
+    using namespace lsp;
+
+
+    fgroup_t::fgroup_t()
     {
-        return 0;
     }
-#endif /* LSP_IDE_DEBUG */
+
+    fgroup_t::~fgroup_t()
+    {
+        for (size_t i=0, n=vSlaves.size(); i<n; ++i)
+        {
+            LSPString *slave = vSlaves.uget(i);
+            if (slave != NULL)
+                delete slave;
+        }
+
+        vSlaves.flush();
+    }
+
+    config_t::config_t()
+    {
+    }
+
+    config_t::~config_t()
+    {
+        lltl::parray<fgroup_t> groups;
+        vGroups.values(&groups);
+        vGroups.flush();
+
+        for (size_t i=0, n=groups.size(); i<n; ++i)
+        {
+            fgroup_t *g = groups.uget(i);
+            if (g != NULL)
+                delete g;
+        }
+        groups.flush();
+    }
+}
+

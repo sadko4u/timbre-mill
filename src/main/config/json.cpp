@@ -3,7 +3,7 @@
  *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 10 февр. 2021 г.
+ * Created on: 11 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,11 +19,17 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/common/types.h>
+#include <private/config/json.h>
 
-#ifndef LSP_IDE_DEBUG
-    int main(int argc, const char **argv)
+namespace timbremill
+{
+    using namespace lsp;
+
+    status_t parse_json_config(config_t *cfg, io::IInSequence *is)
     {
-        return 0;
+        // TODO
+        return STATUS_BAD_FORMAT;
     }
-#endif /* LSP_IDE_DEBUG */
+}
+
+
