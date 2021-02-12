@@ -42,11 +42,14 @@ namespace timbremill
         public:
             LSPString               sName;
             LSPString               sMaster;
-            lltl::parray<LSPString> vSlaves;
+            lltl::parray<LSPString> vFiles;
 
         public:
             explicit fgroup_t();
             ~fgroup_t();
+
+        public:
+            void clear();
     };
 
     /**
@@ -63,6 +66,9 @@ namespace timbremill
         public:
             explicit config_t();
             ~config_t();
+
+        public:
+            void clear();
     };
 
 }

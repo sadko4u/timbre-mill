@@ -35,8 +35,6 @@ include $(PROJECT)
 UNIQ_DEPENDENCIES       = $(call uniq,$(DEPENDENCIES) $(TEST_DEPENDENCIES))
 UNIQ_ALL_DEPENDENCIES  := $(call uniq,$(ALL_DEPENDENCIES))
 
-$(info UNIQ_DEPENDENCIES = $(UNIQ_DEPENDENCIES))
-
 # Find the proper branch of the GIT repository
 ifeq ($(TREE),1)
   MODULES                := $(BASEDIR)/modules

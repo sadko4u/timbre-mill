@@ -23,6 +23,7 @@
 #include <private/config/json.h>
 
 #include <lsp-plug.in/io/InSequence.h>
+#include <lsp-plug.in/io/InMarkSequence.h>
 
 namespace timbremill
 {
@@ -95,12 +96,33 @@ namespace timbremill
 
     status_t parse_config(config_t *cfg, io::IInSequence *is)
     {
-        // TODO: add buffering io::InBufferSequence
-        status_t res = parse_json_config(cfg, is);
+        io::InMarkSequence ims;
+        status_t res;
+
+        if ((res = ims.wrap(is, false)) == STATUS_OK)
+        {
+            res = ims.mark(0x1000);
+            if (res == STATUS_OK)
+            {
+                // Parse json configuration
+                res = parse_json_config(cfg, is);
+
+                if (res != STATUS_OK)
+                    res = STATUS_BAD_FORMAT;
+            }
+        }
+
+        // Close the sequence
         if (res == STATUS_OK)
+            res = ims.close();
+        else
+            ims.close();
+
+        return res;
+        if ((res = ims.wrap(is, false)) != STATUS_OK)
             return res;
 
-        return STATUS_BAD_FORMAT;
+        return res;
     }
 }
 

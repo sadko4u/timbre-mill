@@ -32,14 +32,19 @@ namespace timbremill
 
     fgroup_t::~fgroup_t()
     {
-        for (size_t i=0, n=vSlaves.size(); i<n; ++i)
+        clear();
+    }
+
+    void fgroup_t::clear()
+    {
+        for (size_t i=0, n=vFiles.size(); i<n; ++i)
         {
-            LSPString *slave = vSlaves.uget(i);
+            LSPString *slave = vFiles.uget(i);
             if (slave != NULL)
                 delete slave;
         }
 
-        vSlaves.flush();
+        vFiles.flush();
     }
 
     config_t::config_t()
@@ -47,6 +52,11 @@ namespace timbremill
     }
 
     config_t::~config_t()
+    {
+        clear();
+    }
+
+    void config_t::clear()
     {
         lltl::parray<fgroup_t> groups;
         vGroups.values(&groups);
@@ -60,5 +70,6 @@ namespace timbremill
         }
         groups.flush();
     }
+
 }
 
