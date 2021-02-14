@@ -31,6 +31,13 @@ UTEST_BEGIN("timbremill", config)
 
         UTEST_ASSERT(cfg->vGroups.size() == 2);
 
+        // Validate root parameters
+        UTEST_ASSERT(cfg->nSampleRate == 44100);
+        UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/test"));
+        UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/out"));
+        UTEST_ASSERT(cfg->sOutIR.equals_ascii("%{master_name}/test-${file_name} - IR.wav"));
+        UTEST_ASSERT(cfg->sOutData.equals_ascii("%{master_name}/test-${file_name} - processed.wav"));
+
         // Validate "group1"
         UTEST_ASSERT(key.set_ascii("group1"));
         UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);

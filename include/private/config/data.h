@@ -61,7 +61,12 @@ namespace timbremill
             config_t & operator = (const config_t &);
 
         public:
-            lltl::pphash<LSPString, fgroup_t>       vGroups;
+            LSPString                               sSrcPath;       // Source path (for source files)
+            LSPString                               sDstPath;       // Destination path (for destination files)
+            LSPString                               sOutIR;         // Format of IR output file name
+            LSPString                               sOutData;       // Format of data output file name
+            ssize_t                                 nSampleRate;    // Sample rate for output files
+            lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
 
         public:
             explicit config_t();

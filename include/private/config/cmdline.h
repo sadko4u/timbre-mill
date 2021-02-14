@@ -3,7 +3,7 @@
  *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 10 февр. 2021 г.
+ * Created on: 15 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,27 +19,33 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/common/types.h>
-#include <private/config/config.h>
-#include <private/config/cmdline.h>
+#ifndef PRIVATE_CONFIG_CMDLINE_H_
+#define PRIVATE_CONFIG_CMDLINE_H_
+
+#include <lsp-plug.in/common/status.h>
+#include <private/config/data.h>
 
 namespace timbremill
 {
-    int main(int argc, const char **argv)
-    {
-        // Parse configuration from file and cmdline
-        config_t cfg;
-        status_t res = parce_cmdline(&cfg, argc, argv);
-        if (res != STATUS_OK)
-            return (res == STATUS_SKIP) ? STATUS_OK : res;
+    using namespace lsp;
 
-        return 0;
-    }
+    /**
+     * Output usage of the tool
+     *
+     * @param name command line tool name
+     * @param fail return fail status code
+     * @return status code
+     */
+    status_t print_usage(const char *name, bool fail);
+
+    /**
+     * Parse command line
+     * @param cfg configuration
+     * @param argc number of command line arguments
+     * @param argv command line arguments
+     * @return status of operation
+     */
+    status_t parce_cmdline(config_t *cfg, int argc, const char **argv);
 }
 
-#ifndef LSP_IDE_DEBUG
-    int main(int argc, const char **argv)
-    {
-        return timbremill::main(argc, argv);
-    }
-#endif /* LSP_IDE_DEBUG */
+#endif /* PRIVATE_CONFIG_CMDLINE_H_ */

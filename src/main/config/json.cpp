@@ -27,6 +27,39 @@ namespace timbremill
 {
     using namespace lsp;
 
+    status_t parse_json_config_string(LSPString *str, json::Parser *p)
+    {
+        json::event_t ev;
+
+        // Should be JSON object
+        status_t res = p->read_next(&ev);
+        if (res != STATUS_OK)
+            return res;
+        else if (ev.type != json::JE_STRING)
+            return STATUS_BAD_TYPE;
+
+        // Parse string value
+        if (!str->set(&ev.sValue))
+            return STATUS_NO_MEM;
+        return STATUS_OK;
+    }
+
+    status_t parse_json_config_int(ssize_t *dst, json::Parser *p)
+    {
+        json::event_t ev;
+
+        // Should be JSON object
+        status_t res = p->read_next(&ev);
+        if (res != STATUS_OK)
+            return res;
+        else if (ev.type != json::JE_INTEGER)
+            return STATUS_BAD_TYPE;
+
+        // Parse string value
+        *dst = ev.iValue;
+        return STATUS_OK;
+    }
+
     status_t parse_json_config_group_files(fgroup_t *grp, json::Parser *p)
     {
         json::event_t ev;
@@ -221,6 +254,16 @@ namespace timbremill
             // Analyze event
             if (ev.sValue.equals_ascii("groups"))
                 res = parse_json_config_groups(cfg, p);
+            else if (ev.sValue.equals_ascii("src_path"))
+                res = parse_json_config_string(&cfg->sSrcPath, p);
+            else if (ev.sValue.equals_ascii("dst_path"))
+                res = parse_json_config_string(&cfg->sDstPath, p);
+            else if (ev.sValue.equals_ascii("out_ir"))
+                res = parse_json_config_string(&cfg->sOutIR, p);
+            else if (ev.sValue.equals_ascii("out_data"))
+                res = parse_json_config_string(&cfg->sOutData, p);
+            else if (ev.sValue.equals_ascii("srate"))
+                res = parse_json_config_int(&cfg->nSampleRate, p);
             else
                 res = p->skip_current();
 

@@ -1,4 +1,10 @@
 {
+	"srate": 44100,
+	"src_path": "/home/test",
+	"dst_path": "/home/out",
+	"out_ir": "%{master_name}/test-${file_name} - IR.wav",
+	"out_data": "%{master_name}/test-${file_name} - processed.wav",
+
 	"groups": {
 		"group1": {
 			"master": "file1.wav",
