@@ -45,7 +45,7 @@ namespace timbremill
      * @param argv command line arguments
      * @return status of operation
      */
-    status_t parce_cmdline(config_t *cfg, int argc, const char **argv);
+    status_t parse_cmdline(config_t *cfg, int argc, const char **argv);
 }
 
 #endif /* PRIVATE_CONFIG_CMDLINE_H_ */

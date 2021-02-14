@@ -29,7 +29,7 @@ namespace timbremill
     {
         // Parse configuration from file and cmdline
         config_t cfg;
-        status_t res = parce_cmdline(&cfg, argc, argv);
+        status_t res = parse_cmdline(&cfg, argc, argv);
         if (res != STATUS_OK)
             return (res == STATUS_SKIP) ? STATUS_OK : res;
 
