@@ -1,0 +1,27 @@
+{
+	"srate": 48000,
+	"dst_path": "tmp",
+	"out_ir": "%{master_name}/test-${file_name} - IR.wav",
+	"out_data": "%{master_name}/test-${file_name} - processed.wav",
+
+	"groups": {
+		"trombone": {
+			"master": "trb unmuted.wav",
+			"files": [
+				"trb harmon stem in.wav",
+				"trb humes and berg cup.wav",
+				"trb plunger.wav",
+				"trb solotone.wav",
+				"trb tom crown straight.wav"
+			]
+		},
+		"trumpet": {
+			"master": "trp unmuted.wav",
+			"files": [
+				"trp alessi vacchiano straight.wav",
+				"trp jo ral bubble stem out.wav",
+				"trp plunger.wav"
+			]
+		}
+	}
+}
