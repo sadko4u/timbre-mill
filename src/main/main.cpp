@@ -37,12 +37,12 @@ namespace timbremill
         // Analyze group settings
         if (fg->sMaster.is_empty())
         {
-            fprintf(stdout, "  group '%s' does not have master file, skipping\n");
+            fprintf(stdout, "  group '%s' does not have master file, skipping\n", fg->sName.get_native());
             return STATUS_OK;
         }
         else if (fg->vFiles.is_empty())
         {
-            fprintf(stdout, "  group '%s' does not have any child files, skipping\n");
+            fprintf(stdout, "  group '%s' does not have any child files, skipping\n", fg->sName.get_native());
             return STATUS_OK;
         }
 

@@ -41,6 +41,16 @@ namespace timbremill
      * @return status of operation
      */
     status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *base, const LSPString *name);
+
+    /**
+     * Compute the spectral profile for the input signal
+     *
+     * @param profile spectral profile containing 2^precision averaged spectrum magnitude values.
+     * @param src source sample
+     * @param precision the precision of the spectral profile.
+     * @return status of operation
+     */
+    status_t spectral_profile(dspu::Sample *profile, const dspu::Sample *src, size_t precision);
 }
 
 

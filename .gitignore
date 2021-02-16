@@ -14,3 +14,4 @@
 *.core
 /.config.mk
 /INSTALL/
+/tmp
