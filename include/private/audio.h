@@ -51,6 +51,22 @@ namespace timbremill
      * @return status of operation
      */
     status_t spectral_profile(dspu::Sample *profile, const dspu::Sample *src, size_t precision);
+
+    /**
+     * Compute the impulse response for timbral correction
+     *
+     * @param dst destination sample to store the impulse response
+     * @param master the master profile
+     * @param child the child file profile
+     * @param precision the FFT precision
+     * @param db_range the dynamic range
+     * @return status of operation
+     */
+    status_t timbre_impulse_response(
+            dspu::Sample *dst,
+            const dspu::Sample *master, const dspu::Sample *child,
+            size_t precision, float db_range
+    );
 }
 
 

@@ -191,6 +191,70 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t timbre_impulse_response(
+            dspu::Sample *dst,
+            const dspu::Sample *master, const dspu::Sample *child,
+            size_t precision, float db_range
+    )
+    {
+        dspu::Sample out;
+        status_t res;
+
+        // Check sizes
+        if (master->samples() != child->samples())
+        {
+            fprintf(stderr, "  The lenghts of audio profiles differ\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+        if (master->channels() != child->channels())
+        {
+            fprintf(stderr, "  The number of channels of audio profiles differ\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        // Copy the data from child sample to the output sample
+        if ((res = out.copy(child)) != STATUS_OK)
+        {
+            fprintf(stderr, "  Error initializing the sample data\n");
+            return STATUS_BAD_ARGUMENTS;
+        }
+
+        // Process each channel of the samples
+        uint8_t *ptr    = NULL;
+        size_t bins     = 1 << precision;
+        size_t half     = bins >> 1;
+
+        // Allocate the buffers for processing
+        size_t to_alloc = bins * 2 + bins * 2; // fft + tmp + wnd
+        float *fft      = alloc_aligned<float>(ptr, to_alloc, 64);
+        float *tmp      = &fft[bins * 2];
+        float *wnd      = &tmp[bins];
+        if (fft == NULL)
+            return STATUS_NO_MEM;
+
+        dspu::windows::blackman_nuttall(wnd, bins);
+
+        // Make impulse response for each channel
+        for (size_t i=0, n=out.channels(); i<n; ++i)
+        {
+            float *chan = out.channel(i);
+            dsp::div2(chan, master->channel(i), out.samples());     // Compute reverse specrum characterisic
+
+            dsp::pcomplex_r2c(fft, chan, bins);                     // Prepare the FFT buffer with zero phase
+            dsp::packed_reverse_fft(fft, fft, precision);           // Perform reverse FFT
+            dsp::pcomplex_c2r(tmp, fft, bins);                      // Convert back to real data, drop complex data which is 0
+            dsp::copy(chan, &tmp[half], half);                      // Make the IR linear-phase
+            dsp::copy(&chan[half], tmp, half);
+            dsp::mul2(chan, wnd, bins);                             // Apply window
+        }
+
+        // Release allocated data and return result
+        dst->swap(&out);
+        free_aligned(ptr);
+
+        return STATUS_OK;
+    }
+
 }
 
 

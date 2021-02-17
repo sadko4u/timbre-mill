@@ -28,11 +28,11 @@
 #define SAMPLE_RATE         48000
 #define FFT_PRECISION       16
 
-MTEST_BEGIN("timbremill", profile)
+MTEST_BEGIN("timbremill", ir)
 
     MTEST_MAIN
     {
-        lsp::dspu::Sample s, pu, pp, ct;
+        lsp::dspu::Sample s, pu, pp, ir;
         LSPString base, name;
         io::Path out;
 
@@ -48,55 +48,44 @@ MTEST_BEGIN("timbremill", profile)
         MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
         MTEST_ASSERT(timbremill::spectral_profile(&pp, &s, FFT_PRECISION) == STATUS_OK);
 
-        // Compute the correction timbre
+        // Compute the impulse response
         MTEST_ASSERT(pu.channels() == pp.channels());
         MTEST_ASSERT(pu.length() == pp.length());
+        MTEST_ASSERT(timbremill::timbre_impulse_response(&ir, &pu, &pp, FFT_PRECISION, 48.0f) == STATUS_OK);
 
-        MTEST_ASSERT(ct.copy(&pp) == STATUS_OK);
-        for (size_t i=0; i < ct.channels(); ++i)
-        {
-            dsp::div2(ct.channel(i), pu.channel(i), ct.length());
-        }
+        // Save the impulse response
+        MTEST_ASSERT(out.fmt("%s/%s-ir.wav", tempdir(), full_name()) > 0);
+        ir.set_sample_rate(SAMPLE_RATE);
+        printf("Writing IR to file: %s\n", out.as_native());
+        MTEST_ASSERT(ir.save(&out) == ssize_t(ir.length()));
 
         // Open output file
-        MTEST_ASSERT(out.fmt("%s/%s-spectrum.csv", tempdir(), full_name()) > 0);
-        printf("Writing result to file: %s\n", out.as_native());
+        MTEST_ASSERT(out.fmt("%s/%s-osc.csv", tempdir(), full_name()) > 0);
+        printf("Dumping oscillogram to file: %s\n", out.as_native());
         FILE *fd        = fopen(out.as_native(), "w");
         MTEST_ASSERT(fd != NULL);
 
-        // Emit the output file
-        ssize_t half    = pu.length() >> 1;
-        float kf        = (SAMPLE_RATE * 0.5f) / half;
-        float kn        = 1.0f / half;
-
         // Output header
-        fprintf(fd, "frequency;");
-        for (size_t j=0; j<pu.channels(); ++j)
-            fprintf(fd, "pu channel %d;", int(j));
-        for (size_t j=0; j<pp.channels(); ++j)
-            fprintf(fd, "pp channel %d;", int(j));
-        for (size_t j=0; j<ct.channels(); ++j)
-            fprintf(fd, "ct channel %d;", int(j));
+        fprintf(fd, "sample;");
+        for (size_t j=0; j<ir.channels(); ++j)
+            fprintf(fd, "ir channel %d;", int(j));
+        for (size_t j=0; j<ir.channels(); ++j)
+            fprintf(fd, "ir channel %d db;", int(j));
         fprintf(fd, "\n");
 
         // Output data
-        for (ssize_t i=0; i<=half; ++i)
+        for (size_t i=0; i <= ir.length(); ++i)
         {
-            fprintf(fd, "%.3f;", i * kf);
-            for (size_t j=0; j<pu.channels(); ++j)
+            fprintf(fd, "%d;", int(i));
+            for (size_t j=0; j<ir.channels(); ++j)
             {
-                float *c = pu.channel(j);
-                fprintf(fd, "%.2f;", dspu::gain_to_db(c[i] * kn));
+                float *c = ir.channel(j);
+                fprintf(fd, "%g;", c[i]);
             }
-            for (size_t j=0; j<pp.channels(); ++j)
+            for (size_t j=0; j<ir.channels(); ++j)
             {
-                float *c = pp.channel(j);
-                fprintf(fd, "%.2f;", dspu::gain_to_db(c[i] * kn));
-            }
-            for (size_t j=0; j<ct.channels(); ++j)
-            {
-                float *c = ct.channel(j);
-                fprintf(fd, "%.2f;", dspu::gain_to_db(c[i] * kn));
+                float *c = ir.channel(j);
+                fprintf(fd, "%.2f;", dspu::gain_to_db(fabs(c[i])));
             }
             fprintf(fd, "\n");
         }
