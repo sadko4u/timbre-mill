@@ -66,6 +66,7 @@ namespace timbremill
             LSPString                               sOutIR;         // Format of IR output file name
             LSPString                               sOutData;       // Format of data output file name
             ssize_t                                 nSampleRate;    // Sample rate for output files
+            float                                   fGainRange;     // Gain range (in decibels)
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
 
         public:

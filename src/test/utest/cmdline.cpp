@@ -20,6 +20,7 @@
  */
 
 #include <lsp-plug.in/test-fw/utest.h>
+#include <lsp-plug.in/test-fw/helpers.h>
 #include <lsp-plug.in/common/status.h>
 #include <lsp-plug.in/lltl/parray.h>
 #include <lsp-plug.in/io/Path.h>
@@ -36,6 +37,7 @@ UTEST_BEGIN("timbremill", cmdline)
 
         // Validate root parameters
         UTEST_ASSERT(cfg->nSampleRate == 88200);
+        UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 36.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/user/in"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/user/out"));
         UTEST_ASSERT(cfg->sOutIR.equals_ascii("%{master_name}-${file_name} - IR.wav"));
@@ -68,6 +70,7 @@ UTEST_BEGIN("timbremill", cmdline)
         static const char *ext_argv[] =
         {
             "-d",   "/home/user/out",
+            "-gr",  "36",
             "-od",  "%{master_name}-${file_name} - processed.wav",
             "-oi",  "%{master_name}-${file_name} - IR.wav",
             "-sr",  "88200",

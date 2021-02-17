@@ -22,6 +22,7 @@
 #include <lsp-plug.in/test-fw/mtest.h>
 #include <lsp-plug.in/stdlib/stdio.h>
 #include <lsp-plug.in/dsp-units/units.h>
+#include <lsp-plug.in/dsp/dsp.h>
 #include <private/audio.h>
 
 #define SAMPLE_RATE         48000
@@ -31,39 +32,68 @@ MTEST_BEGIN("timbremill", profile)
 
     MTEST_MAIN
     {
-        lsp::dspu::Sample s, prof;
+        lsp::dspu::Sample s, pu, pp, ct;
         LSPString base, name;
         io::Path out;
 
-        // Load the audio file and compute spectral profile
+        // Load the 'unmuted' audio file and compute spectral profile
         MTEST_ASSERT(base.set_native(resources()));
         MTEST_ASSERT(name.set_ascii("samples/trumpet/trp unmuted.wav"));
         MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
-        MTEST_ASSERT(timbremill::spectral_profile(&prof, &s, FFT_PRECISION) == STATUS_OK);
-        MTEST_ASSERT(out.fmt("%s/%s-spectrum.csv", tempdir(), full_name()) > 0);
+        MTEST_ASSERT(timbremill::spectral_profile(&pu, &s, FFT_PRECISION) == STATUS_OK);
 
+        // Load the 'plunger' audio file and compute spectral profile
+        MTEST_ASSERT(base.set_native(resources()));
+        MTEST_ASSERT(name.set_ascii("samples/trumpet/trp plunger.wav"));
+        MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
+        MTEST_ASSERT(timbremill::spectral_profile(&pp, &s, FFT_PRECISION) == STATUS_OK);
+
+        // Compute the correction timbre
+        MTEST_ASSERT(pu.channels() == pp.channels());
+        MTEST_ASSERT(ct.copy(&pp) == STATUS_OK);
+        for (size_t i=0; i < ct.channels(); ++i)
+        {
+            dsp::div2(ct.channel(i), pu.channel(i), ct.length());
+        }
+
+        // Open output file
+        MTEST_ASSERT(out.fmt("%s/%s-spectrum.csv", tempdir(), full_name()) > 0);
         printf("Writing result to file: %s\n", out.as_native());
         FILE *fd        = fopen(out.as_native(), "w");
         MTEST_ASSERT(fd != NULL);
 
         // Emit the output file
-        ssize_t half    = prof.length() >> 1;
+        ssize_t half    = pu.length() >> 1;
         float kf        = (SAMPLE_RATE * 0.5f) / half;
         float kn        = 1.0f / half;
 
         // Output header
         fprintf(fd, "frequency;");
-        for (size_t j=0; j<prof.channels(); ++j)
-            fprintf(fd, "channel %d;", int(j));
+        for (size_t j=0; j<pu.channels(); ++j)
+            fprintf(fd, "pu channel %d;", int(j));
+        for (size_t j=0; j<pp.channels(); ++j)
+            fprintf(fd, "pp channel %d;", int(j));
+        for (size_t j=0; j<ct.channels(); ++j)
+            fprintf(fd, "ct channel %d;", int(j));
         fprintf(fd, "\n");
 
         // Output data
         for (ssize_t i=0; i<=half; ++i)
         {
             fprintf(fd, "%.3f;", i * kf);
-            for (size_t j=0; j<prof.channels(); ++j)
+            for (size_t j=0; j<pu.channels(); ++j)
             {
-                float *c = prof.channel(j);
+                float *c = pu.channel(j);
+                fprintf(fd, "%.2f;", dspu::gain_to_db(c[i] * kn));
+            }
+            for (size_t j=0; j<pp.channels(); ++j)
+            {
+                float *c = pp.channel(j);
+                fprintf(fd, "%.2f;", dspu::gain_to_db(c[i] * kn));
+            }
+            for (size_t j=0; j<ct.channels(); ++j)
+            {
+                float *c = ct.channel(j);
                 fprintf(fd, "%.2f;", dspu::gain_to_db(c[i] * kn));
             }
             fprintf(fd, "\n");

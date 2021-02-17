@@ -34,27 +34,16 @@ namespace timbremill
         return (fail) ? STATUS_BAD_ARGUMENTS : STATUS_SKIP;
     }
 
-    static const char *aliases[] =
-    {
-        "-c",   "--config",
-        "-d",   "--dst-path",
-        "-h",   "--help",
-        "-od",  "--out-data",
-        "-oi",  "--out-ir",
-        "-sr",  "--srate",
-        "-s",   "--src-path",
-
-        NULL
-    };
-
     static const char *options[] =
     {
-        "config",
-        "dst-path",
-        "out-data",
-        "out-ir",
-        "srate",
-        "src-path",
+        "-c",   "--config",         "Configuration file name",
+        "-d",   "--dst-path",       "Destination path to store audio files",
+        "-gr",  "--gain-range",     "Gain dynamic range for building inverse frequency response",
+        "-h",   "--help",           "Output this help message",
+        "-od",  "--out-data",       "Format of the output data file name",
+        "-oi",  "--out-ir",         "Format of the output impulse response file name",
+        "-sr",  "--srate",          "Sample rate of output files",
+        "-s",   "--src-path",       "Source path to take files from",
 
         NULL
     };
@@ -83,6 +72,31 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t parse_cmdline_float(float *dst, const char *val)
+    {
+        LSPString in;
+        if (!in.set_native(val))
+            return STATUS_NO_MEM;
+
+        io::InStringSequence is(&in);
+        expr::Tokenizer t(&is);
+        float fvalue;
+
+        switch (t.get_token(expr::TF_GET))
+        {
+            case expr::TT_IVALUE: fvalue = t.int_value(); break;
+            case expr::TT_FVALUE: fvalue = t.float_value(); break;
+            default: return STATUS_INVALID_VALUE;
+        }
+
+        if (t.get_token(expr::TF_GET) != expr::TT_EOF)
+            return STATUS_INVALID_VALUE;
+
+        *dst = fvalue;
+
+        return STATUS_OK;
+    }
+
     status_t parse_cmdline(config_t *cfg, int argc, const char **argv)
     {
         const char *cmd = argv[0], *val;
@@ -94,7 +108,7 @@ namespace timbremill
             const char *opt = argv[i++];
 
             // Aliases
-            for (const char **p = timbremill::aliases; *p != NULL; p += 2)
+            for (const char **p = timbremill::options; *p != NULL; p += 3)
                 if (!strcmp(opt, p[0]))
                 {
                     opt = p[1];
@@ -111,12 +125,12 @@ namespace timbremill
                 return STATUS_BAD_ARGUMENTS;
             }
             else
-                xopt = opt + 2; // Remove trailing '--'
+                xopt = opt;
 
             // Parse options
             bool found = false;
-            for (const char **p = timbremill::options; *p != NULL; ++p)
-                if (!strcmp(xopt, *p))
+            for (const char **p = timbremill::options; *p != NULL; p += 3)
+                if (!strcmp(xopt, p[1]))
                 {
                     if (i >= argc)
                     {
@@ -151,7 +165,7 @@ namespace timbremill
         }
 
         // Now we are ready to read config file
-        const char *cfg_name = options.get("config");
+        const char *cfg_name = options.get("--config");
         if (cfg_name == NULL)
         {
             fprintf(stderr, "Not defined configuration file name\n");
@@ -167,19 +181,27 @@ namespace timbremill
         }
 
         // Override configuration file parameters
-        if ((val = options.get("out-data")) != NULL)
+        if ((val = options.get("--out-data")) != NULL)
             cfg->sOutData.set_native(val);
-        if ((val = options.get("out-ir")) != NULL)
+        if ((val = options.get("--out-ir")) != NULL)
             cfg->sOutIR.set_native(val);
-        if ((val = options.get("dst-path")) != NULL)
+        if ((val = options.get("--dst-path")) != NULL)
             cfg->sDstPath.set_native(val);
-        if ((val = options.get("src-path")) != NULL)
+        if ((val = options.get("--src-path")) != NULL)
             cfg->sSrcPath.set_native(val);
-        if ((val = options.get("srate")) != NULL)
+        if ((val = options.get("--srate")) != NULL)
         {
             if ((res = parse_cmdline_int(&cfg->nSampleRate, val)) != STATUS_OK)
             {
                 fprintf(stderr, "Bad sample rate value\n");
+                return res;
+            }
+        }
+        if ((val = options.get("--gain-range")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fGainRange, val)) != STATUS_OK)
+            {
+                fprintf(stderr, "Bad gain range value\n");
                 return res;
             }
         }

@@ -20,6 +20,7 @@
  */
 
 #include <lsp-plug.in/test-fw/utest.h>
+#include <lsp-plug.in/test-fw/helpers.h>
 #include <private/config/config.h>
 
 UTEST_BEGIN("timbremill", config)
@@ -33,6 +34,7 @@ UTEST_BEGIN("timbremill", config)
 
         // Validate root parameters
         UTEST_ASSERT(cfg->nSampleRate == 44100);
+        UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 72.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/test"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/out"));
         UTEST_ASSERT(cfg->sOutIR.equals_ascii("%{master_name}/test-${file_name} - IR.wav"));

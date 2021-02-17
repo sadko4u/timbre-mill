@@ -50,6 +50,7 @@ namespace timbremill
     config_t::config_t()
     {
         nSampleRate     = 48000;
+        fGainRange      = 48.0f;
 
         sOutIR.set_ascii("%{master_name}/${file_name} - IR.wav");
         sOutData.set_ascii("%{master_name}/${file_name} - processed.wav");

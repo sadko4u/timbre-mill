@@ -52,11 +52,31 @@ namespace timbremill
         status_t res = p->read_next(&ev);
         if (res != STATUS_OK)
             return res;
-        else if (ev.type != json::JE_INTEGER)
+        else if (ev.type == json::JE_INTEGER)
+            *dst = ev.iValue;
+        else
             return STATUS_BAD_TYPE;
 
-        // Parse string value
-        *dst = ev.iValue;
+        // Return OK status
+        return STATUS_OK;
+    }
+
+    status_t parse_json_config_float(float *dst, json::Parser *p)
+    {
+        json::event_t ev;
+
+        // Should be JSON object
+        status_t res = p->read_next(&ev);
+        if (res != STATUS_OK)
+            return res;
+        else if (ev.type == json::JE_INTEGER)
+            *dst    = ev.iValue;
+        else if (ev.type == json::JE_DOUBLE)
+            *dst    = ev.fValue;
+        else
+            return STATUS_BAD_TYPE;
+
+        // Return OK status
         return STATUS_OK;
     }
 
@@ -264,6 +284,8 @@ namespace timbremill
                 res = parse_json_config_string(&cfg->sOutData, p);
             else if (ev.sValue.equals_ascii("srate"))
                 res = parse_json_config_int(&cfg->nSampleRate, p);
+            else if (ev.sValue.equals_ascii("gain_range"))
+                res = parse_json_config_float(&cfg->fGainRange, p);
             else
                 res = p->skip_current();
 

@@ -2,6 +2,7 @@
 	"srate": 44100,
 	"src_path": "/home/test",
 	"dst_path": "/home/out",
+	"gain_range": 72,
 	"out_ir": "%{master_name}/test-${file_name} - IR.wav",
 	"out_data": "%{master_name}/test-${file_name} - processed.wav",
 
