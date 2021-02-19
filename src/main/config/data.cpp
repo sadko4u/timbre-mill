@@ -61,6 +61,7 @@ namespace timbremill
     config_t::config_t()
     {
         nSampleRate     = 48000;
+        nFftRank        = 12; // 4096 samples
         fGainRange      = 48.0f;
 
         sFile.set_ascii("%{master_name}/${file_name} - processed.wav");

@@ -25,6 +25,7 @@
 #include <lsp-plug.in/common/status.h>
 #include <lsp-plug.in/runtime/LSPString.h>
 #include <lsp-plug.in/dsp-units/sampling/Sample.h>
+#include <lsp-plug.in/expr/Resolver.h>
 
 
 namespace timbremill
@@ -41,6 +42,17 @@ namespace timbremill
      * @return status of operation
      */
     status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *base, const LSPString *name);
+
+    /**
+     * Save audio file
+     *
+     * @param sample sample to save
+     * @param base base directory
+     * @param fmt output file name format
+     * @param vars variable to parametrize the output file name format
+     * @return status of operation
+     */
+    status_t save_audio_file(dspu::Sample *sample, const LSPString *base, const LSPString *fmt, expr::Resolver *vars);
 
     /**
      * Compute the spectral profile for the input signal
@@ -67,6 +79,7 @@ namespace timbremill
             const dspu::Sample *master, const dspu::Sample *child,
             size_t precision, float db_range
     );
+
 }
 
 

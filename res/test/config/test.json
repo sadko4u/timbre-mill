@@ -3,6 +3,7 @@
 	"src_path": "/home/test",
 	"dst_path": "/home/out",
 	"gain_range": 72,
+	"fft_rank": 16,
 	
 	"file": "%{master_name}/test-${file_name} - processed.wav",
 	

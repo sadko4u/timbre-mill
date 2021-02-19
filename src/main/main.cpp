@@ -22,17 +22,75 @@
 #include <lsp-plug.in/common/types.h>
 #include <lsp-plug.in/dsp/dsp.h>
 #include <lsp-plug.in/dsp-units/sampling/Sample.h>
+#include <lsp-plug.in/expr/Variables.h>
 
 #include <private/config/config.h>
 #include <private/config/cmdline.h>
 #include <private/audio.h>
 
+#define FFT_MIN     8
+#define FFT_MAX     16
+
 namespace timbremill
 {
+    status_t build_variables(expr::Variables *vars, config_t *cfg, fgroup_t *fg, LSPString *master, LSPString *child)
+    {
+        io::Path path;
+        LSPString value;
+        status_t res;
+
+        // Clear variables
+        vars->clear();
+
+        // Common variables
+        if ((res = vars->set_int("srate", cfg->nSampleRate)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("group", &fg->sName)) != STATUS_OK)
+            return res;
+
+        // Parse master file name
+        if ((res = path.set(master)) != STATUS_OK)
+            return res;
+
+        if ((res = path.get_last(&value)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("master", &value)) != STATUS_OK)
+            return res;
+        if ((res = path.get_ext(&value)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("master_ext", &value)) != STATUS_OK)
+            return res;
+        if ((res = path.get_noext(&value)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("master_name", &value)) != STATUS_OK)
+            return res;
+
+        // Parse child file name
+        if ((res = path.set(child)) != STATUS_OK)
+            return res;
+
+        if ((res = path.get_last(&value)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("file", &value)) != STATUS_OK)
+            return res;
+        if ((res = path.get_ext(&value)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("file_ext", &value)) != STATUS_OK)
+            return res;
+        if ((res = path.get_noext(&value)) != STATUS_OK)
+            return res;
+        if ((res = vars->set_string("file_name", &value)) != STATUS_OK)
+            return res;
+
+        return STATUS_OK;
+    }
+
     status_t process_file_group(config_t *cfg, fgroup_t *fg)
     {
-        dspu::Sample master;
+        dspu::Sample master, mp;
+        expr::Variables vars;
         status_t res;
+        ssize_t fft_rank    = lsp_limit(cfg->nFftRank, FFT_MIN, FFT_MAX);
 
         // Analyze group settings
         if (fg->sMaster.is_empty())
@@ -50,15 +108,57 @@ namespace timbremill
         if ((res = load_audio_file(&master, cfg->nSampleRate, &cfg->sSrcPath, &fg->sMaster)) != STATUS_OK)
             return res;
 
+        // Compute the audio profile for master
+        if ((res = spectral_profile(&mp, &master, fft_rank)) != STATUS_OK)
+        {
+            fprintf(stderr, "  error computing spectral profile for the master file '%s'\n", fg->sName.get_native());
+            return res;
+        }
+
         for (size_t i=0, n=fg->vFiles.size(); i<n; ++i)
         {
-            dspu::Sample child;
+            dspu::Sample child, cp, ir, raw_ir;
             LSPString *fname = fg->vFiles.uget(i);
             if (fname == NULL)
+            {
+                fprintf(stderr, "  internal error\n");
                 return STATUS_UNKNOWN_ERR;
+            }
+
+            // Build variables
+            if ((res = build_variables(&vars, cfg, fg, &fg->sMaster, fname)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error building pattern variables\n");
+                return res;
+            }
 
             // Load the child file
             if ((res = load_audio_file(&child, cfg->nSampleRate, &cfg->sSrcPath, fname)) != STATUS_OK)
+                return res;
+            if (child.channels() != master.channels())
+            {
+                fprintf(stderr, "  number of channels mimatch: %d (master) vs %d (child), leaving\n",
+                        int(master.channels()), int(child.channels()));
+                return res;
+            }
+
+            // Compute the spectral profile for the child file
+            if ((res = spectral_profile(&cp, &child, fft_rank)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error computing spectral profile for the child file '%s'\n", fname->get_native());
+                return res;
+            }
+
+            // Compute the impulse response of the file
+            if ((res = timbre_impulse_response(&raw_ir, &mp, &cp, fft_rank, cfg->fGainRange)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error computing raw impulse response for the child file '%s'\n", fname->get_native());
+                return res;
+            }
+
+            // Save the IR file
+            raw_ir.set_sample_rate(cfg->nSampleRate);
+            if ((res = save_audio_file(&raw_ir, &cfg->sDstPath, &cfg->sIR.sRaw, &vars)) != STATUS_OK)
                 return res;
         }
 

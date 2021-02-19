@@ -34,6 +34,7 @@ UTEST_BEGIN("timbremill", config)
 
         // Validate root parameters
         UTEST_ASSERT(cfg->nSampleRate == 44100);
+        UTEST_ASSERT(cfg->nFftRank == 16);
         UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 72.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/test"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/out"));

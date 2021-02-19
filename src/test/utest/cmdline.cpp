@@ -37,15 +37,16 @@ UTEST_BEGIN("timbremill", cmdline)
 
         // Validate root parameters
         UTEST_ASSERT(cfg->nSampleRate == 88200);
+        UTEST_ASSERT(cfg->nFftRank == 8);
         UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 36.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/user/in"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/user/out"));
         UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("%{master_name}-${file_name} - IR.wav"));
         UTEST_ASSERT(cfg->sIR.sRaw.equals_ascii("%{master_name}-${file_name} - Raw IR.wav"));
-        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fHeadCut, 45.0f));
-        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 5.0f));
-        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 2.0f));
-        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 50.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fHeadCut, 46.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 6.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 3.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 51.0f));
         UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}-${file_name} - processed.wav"));
 
         // Validate "group1"
@@ -77,12 +78,13 @@ UTEST_BEGIN("timbremill", cmdline)
             "-d",   "/home/user/out",
             "-gr",  "36",
             "-f",   "%{master_name}-${file_name} - processed.wav",
+            "-fr",  "8",
             "-ir",  "%{master_name}-${file_name} - IR.wav",
             "-iw",  "%{master_name}-${file_name} - Raw IR.wav",
-            "-ihc", "45",
-            "-itc", "5",
-            "-ifi", "2",
-            "-ifo", "50",
+            "-ihc", "46",
+            "-itc", "6",
+            "-ifi", "3",
+            "-ifo", "51",
             "-sr",  "88200",
             "-s",   "/home/user/in",
             "-c",

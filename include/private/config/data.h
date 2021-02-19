@@ -85,6 +85,7 @@ namespace timbremill
             LSPString                               sDstPath;       // Destination path (for destination files)
             LSPString                               sFile;          // Format of data output file name
             ssize_t                                 nSampleRate;    // Sample rate for output files
+            ssize_t                                 nFftRank;       // FFT rank
             float                                   fGainRange;     // Gain range (in decibels)
             irfile_t                                sIR;            // IR file data
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups

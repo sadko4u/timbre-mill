@@ -24,9 +24,12 @@
 #include <lsp-plug.in/common/alloc.h>
 #include <lsp-plug.in/dsp/dsp.h>
 #include <lsp-plug.in/dsp-units/misc/windows.h>
+#include <lsp-plug.in/expr/Expression.h>
 
 namespace timbremill
 {
+    using namespace lsp;
+
     typedef struct spc_calc_t
     {
         float  *buf;        // Buffer
@@ -39,6 +42,25 @@ namespace timbremill
         size_t  bins;       // Number of bins
         size_t  radix;      // FFT radix
     } spc_calc_t;
+
+    typedef struct duration_t
+    {
+        size_t h;
+        size_t m;
+        size_t s;
+        size_t ms;
+    } duration_t;
+
+    void calc_duration(duration_t *d, const dspu::Sample *sample)
+    {
+        uint64_t duration = (uint64_t(sample->samples()) * 1000) / sample->sample_rate();
+        d->ms = duration % 1000;
+        duration /= 1000;
+        d->s = duration % 60;
+        duration /= 60;
+        d->m = duration % 60;
+        d->h = duration / 60;
+    }
 
     status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *base, const LSPString *name)
     {
@@ -67,18 +89,12 @@ namespace timbremill
             return res;
         }
 
-        uint64_t duration = (uint64_t(sample->samples()) * 1000) / sample->sample_rate();
-        size_t ms = duration % 1000;
-        duration /= 1000;
-        size_t s = duration % 60;
-        duration /= 60;
-        size_t m = duration % 60;
-        size_t h = duration / 60;
-
+        duration_t d;
+        calc_duration(&d, sample);
         fprintf(stdout, "  loaded file: '%s', channels: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
                 path.as_native(),
                 int(sample->channels()), int(sample->sample_rate()),
-                int(h), int(m), int(s), int(ms)
+                int(d.h), int(d.m), int(d.s), int(d.ms)
         );
 
         // Resample audio data
@@ -89,6 +105,84 @@ namespace timbremill
             );
             return res;
         }
+
+        return STATUS_OK;
+    }
+
+    status_t save_audio_file(dspu::Sample *sample, const LSPString *base, const LSPString *fmt, expr::Resolver *vars)
+    {
+        status_t res;
+        expr::Expression x;
+        expr::value_t val;
+        LSPString fname;
+        io::Path path, dir;
+
+        // Parse the expression
+        if ((res = x.parse(fmt, expr::Expression::FLAG_STRING)) != STATUS_OK)
+        {
+            fprintf(stderr, "  invalid expression: '%s'\n", fmt->get_native());
+            return STATUS_BAD_FORMAT;
+        }
+
+        // Evaluate the expression and cast to string
+        expr::init_value(&val);
+        x.set_resolver(vars);
+        if ((res = x.evaluate(&val)) == STATUS_OK)
+            res = expr::cast_string(&val);
+        if (res != STATUS_OK)
+        {
+            expr::destroy_value(&val);
+            fprintf(stderr, "  could not evaluate expression: '%s'\n", fmt->get_native());
+            return STATUS_BAD_FORMAT;
+        }
+        fname.swap(val.v_str);
+        expr::destroy_value(&val);
+
+        // Generate file name
+        if ((res = path.set(&fname)) != STATUS_OK)
+        {
+            fprintf(stderr, "  could not write file '%s', error code: %d\n", fname.get_native(), int(res));
+            return res;
+        }
+        if (!path.is_absolute())
+        {
+            if ((res = path.set(base, &fname)) != STATUS_OK)
+            {
+                fprintf(stderr, "  could not write file '%s', error code: %d\n", fname.get_native(), int(res));
+                return res;
+            }
+        }
+
+        // Create parent directory recursively
+        res = path.get_parent(&dir);
+        if (res == STATUS_OK)
+        {
+            if ((res = dir.mkdir(true)) != STATUS_OK)
+            {
+                fprintf(stderr, "  could not create directory '%s', error code: %d\n", dir.as_native(), int(res));
+                return res;
+            }
+        }
+        else if (res != STATUS_NOT_FOUND)
+        {
+            fprintf(stderr, "  could not obtain parent directory for file '%s', error code: %d\n", fname.get_native(), int(res));
+            return res;
+        }
+
+        // Load sample from file
+        if ((res = sample->save(&path)) < 0)
+        {
+            fprintf(stderr, "  could not write file '%s', error code: %d\n", path.as_native(), int(-res));
+            return -res;
+        }
+
+        duration_t d;
+        calc_duration(&d, sample);
+        fprintf(stdout, "  saved file: '%s', channels: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
+                path.as_native(),
+                int(sample->channels()), int(sample->sample_rate()),
+                int(d.h), int(d.m), int(d.s), int(d.ms)
+        );
 
         return STATUS_OK;
     }

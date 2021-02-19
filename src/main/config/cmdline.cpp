@@ -234,6 +234,11 @@ namespace timbremill
             if ((res = parse_cmdline_int(&cfg->nSampleRate, val, "sample rate")) != STATUS_OK)
                 return res;
         }
+        if ((val = options.get("--fft-rank")) != NULL)
+        {
+            if ((res = parse_cmdline_int(&cfg->nFftRank, val, "FFT rank")) != STATUS_OK)
+                return res;
+        }
         if ((val = options.get("--gain-range")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->fGainRange, val, "gain range")) != STATUS_OK)
