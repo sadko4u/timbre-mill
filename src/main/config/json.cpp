@@ -248,6 +248,52 @@ namespace timbremill
         return res;
     }
 
+    status_t parse_json_config_ir(irfile_t *ir, json::Parser *p)
+    {
+        json::event_t ev;
+
+        // Should be JSON object
+        status_t res = p->read_next(&ev);
+        if (res != STATUS_OK)
+            return res;
+        else if (ev.type != json::JE_OBJECT_START)
+            return STATUS_BAD_TYPE;
+
+        // Read group object
+        while (true)
+        {
+            // Read property name
+            res = p->read_next(&ev);
+            if (res != STATUS_OK)
+                return res;
+            else if (ev.type == json::JE_OBJECT_END)
+                break;
+            else if (ev.type != json::JE_PROPERTY)
+                return STATUS_BAD_FORMAT;
+
+            if (ev.sValue.equals_ascii("head_cut"))
+                res = parse_json_config_float(&ir->fHeadCut, p);
+            else if (ev.sValue.equals_ascii("tail_cut"))
+                res = parse_json_config_float(&ir->fTailCut, p);
+            else if (ev.sValue.equals_ascii("fade_in"))
+                res = parse_json_config_float(&ir->fFadeIn, p);
+            else if (ev.sValue.equals_ascii("fade_out"))
+                res = parse_json_config_float(&ir->fFadeOut, p);
+            else if (ev.sValue.equals_ascii("file"))
+                res = parse_json_config_string(&ir->sFile, p);
+            else if (ev.sValue.equals_ascii("raw"))
+                res = parse_json_config_string(&ir->sRaw, p);
+            else
+                res = p->skip_current();
+
+            // Analyze result
+            if (res != STATUS_OK)
+                break;
+        }
+
+        return res;
+    }
+
     status_t parse_json_config_root(config_t *cfg, json::Parser *p)
     {
         json::event_t ev;
@@ -274,14 +320,14 @@ namespace timbremill
             // Analyze event
             if (ev.sValue.equals_ascii("groups"))
                 res = parse_json_config_groups(cfg, p);
+            else if (ev.sValue.equals_ascii("ir"))
+                res = parse_json_config_ir(&cfg->sIR, p);
             else if (ev.sValue.equals_ascii("src_path"))
                 res = parse_json_config_string(&cfg->sSrcPath, p);
             else if (ev.sValue.equals_ascii("dst_path"))
                 res = parse_json_config_string(&cfg->sDstPath, p);
-            else if (ev.sValue.equals_ascii("out_ir"))
-                res = parse_json_config_string(&cfg->sOutIR, p);
-            else if (ev.sValue.equals_ascii("out_data"))
-                res = parse_json_config_string(&cfg->sOutData, p);
+            else if (ev.sValue.equals_ascii("file"))
+                res = parse_json_config_string(&cfg->sFile, p);
             else if (ev.sValue.equals_ascii("srate"))
                 res = parse_json_config_int(&cfg->nSampleRate, p);
             else if (ev.sValue.equals_ascii("gain_range"))

@@ -53,6 +53,26 @@ namespace timbremill
     };
 
     /**
+     * Sample cut
+     */
+    struct irfile_t
+    {
+        private:
+            irfile_t & operator = (const irfile_t &);
+
+        public:
+            float                   fHeadCut;       // Head cut (%)
+            float                   fTailCut;       // Tail cut (%)
+            float                   fFadeIn;        // Head fade-out (%)
+            float                   fFadeOut;       // Tail fade-out (%)
+            LSPString               sFile;          // Format of IR file name with modifications
+            LSPString               sRaw;           // Format of IR file name without modifications
+
+        public:
+            explicit irfile_t();
+    };
+
+    /**
      * Overall configuration
      */
     struct config_t
@@ -63,10 +83,10 @@ namespace timbremill
         public:
             LSPString                               sSrcPath;       // Source path (for source files)
             LSPString                               sDstPath;       // Destination path (for destination files)
-            LSPString                               sOutIR;         // Format of IR output file name
-            LSPString                               sOutData;       // Format of data output file name
+            LSPString                               sFile;          // Format of data output file name
             ssize_t                                 nSampleRate;    // Sample rate for output files
             float                                   fGainRange;     // Gain range (in decibels)
+            irfile_t                                sIR;            // IR file data
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
 
         public:

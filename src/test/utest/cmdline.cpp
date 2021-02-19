@@ -40,8 +40,13 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 36.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/user/in"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/user/out"));
-        UTEST_ASSERT(cfg->sOutIR.equals_ascii("%{master_name}-${file_name} - IR.wav"));
-        UTEST_ASSERT(cfg->sOutData.equals_ascii("%{master_name}-${file_name} - processed.wav"));
+        UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("%{master_name}-${file_name} - IR.wav"));
+        UTEST_ASSERT(cfg->sIR.sRaw.equals_ascii("%{master_name}-${file_name} - Raw IR.wav"));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fHeadCut, 45.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 5.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 2.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 50.0f));
+        UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}-${file_name} - processed.wav"));
 
         // Validate "group1"
         UTEST_ASSERT(key.set_ascii("group1"));
@@ -71,8 +76,13 @@ UTEST_BEGIN("timbremill", cmdline)
         {
             "-d",   "/home/user/out",
             "-gr",  "36",
-            "-od",  "%{master_name}-${file_name} - processed.wav",
-            "-oi",  "%{master_name}-${file_name} - IR.wav",
+            "-f",   "%{master_name}-${file_name} - processed.wav",
+            "-ir",  "%{master_name}-${file_name} - IR.wav",
+            "-iw",  "%{master_name}-${file_name} - Raw IR.wav",
+            "-ihc", "45",
+            "-itc", "5",
+            "-ifi", "2",
+            "-ifo", "50",
             "-sr",  "88200",
             "-s",   "/home/user/in",
             "-c",

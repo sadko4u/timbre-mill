@@ -3,8 +3,17 @@
 	"src_path": "/home/test",
 	"dst_path": "/home/out",
 	"gain_range": 72,
-	"out_ir": "%{master_name}/test-${file_name} - IR.wav",
-	"out_data": "%{master_name}/test-${file_name} - processed.wav",
+	
+	"file": "%{master_name}/test-${file_name} - processed.wav",
+	
+	"ir": {
+		"head_cut": 45,
+		"tail_cut": 5,
+		"fade_in": 2,
+		"fade_out": 50,
+		"file": "%{master_name}/test-${file_name} - IR.wav",
+		"raw": "%{master_name}/test-${file_name} - Raw IR.wav"
+	},
 
 	"groups": {
 		"group1": {

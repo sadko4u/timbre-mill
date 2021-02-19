@@ -37,8 +37,13 @@ UTEST_BEGIN("timbremill", config)
         UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 72.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/test"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/out"));
-        UTEST_ASSERT(cfg->sOutIR.equals_ascii("%{master_name}/test-${file_name} - IR.wav"));
-        UTEST_ASSERT(cfg->sOutData.equals_ascii("%{master_name}/test-${file_name} - processed.wav"));
+        UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("%{master_name}/test-${file_name} - IR.wav"));
+        UTEST_ASSERT(cfg->sIR.sRaw.equals_ascii("%{master_name}/test-${file_name} - Raw IR.wav"));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fHeadCut, 45.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 5.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 2.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 50.0f));
+        UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}/test-${file_name} - processed.wav"));
 
         // Validate "group1"
         UTEST_ASSERT(key.set_ascii("group1"));

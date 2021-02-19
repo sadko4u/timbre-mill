@@ -38,17 +38,22 @@ namespace timbremill
     {
         "-c",   "--config",         "Configuration file name",
         "-d",   "--dst-path",       "Destination path to store audio files",
+        "-f",   "--file",           "Format of the output file name",
         "-gr",  "--gain-range",     "Gain dynamic range for building inverse frequency response",
         "-h",   "--help",           "Output this help message",
-        "-od",  "--out-data",       "Format of the output data file name",
-        "-oi",  "--out-ir",         "Format of the output impulse response file name",
+        "-ir",  "--ir-file",        "Format of the processed impulse response file name",
+        "-iw",  "--ir-raw",         "Format of the raw impulse response file name",
+        "-ifi", "--ir-fade-in",     "The amount (in %) of fade-in for the IR file",
+        "-ifo", "--ir-fade-out",    "The amount (in %) of fade-out for the IR file",
+        "-ihc", "--ir-head-cut",    "The amount (in %) of head cut for the IR file",
+        "-itc", "--ir-tail-cut",    "The amount (in %) of tail cut for the IR file",
         "-sr",  "--srate",          "Sample rate of output files",
         "-s",   "--src-path",       "Source path to take files from",
 
         NULL
     };
 
-    status_t parse_cmdline_int(ssize_t *dst, const char *val)
+    status_t parse_cmdline_int(ssize_t *dst, const char *val, const char *parameter)
     {
         LSPString in;
         if (!in.set_native(val))
@@ -61,22 +66,30 @@ namespace timbremill
         switch (t.get_token(expr::TF_GET))
         {
             case expr::TT_IVALUE: ivalue = t.int_value(); break;
-            default: return STATUS_INVALID_VALUE;
+            default:
+                fprintf(stderr, "Bad %s value\n", parameter);
+                return STATUS_INVALID_VALUE;
         }
 
         if (t.get_token(expr::TF_GET) != expr::TT_EOF)
+        {
+            fprintf(stderr, "Bad %s value\n", parameter);
             return STATUS_INVALID_VALUE;
+        }
 
         *dst = ivalue;
 
         return STATUS_OK;
     }
 
-    status_t parse_cmdline_float(float *dst, const char *val)
+    status_t parse_cmdline_float(float *dst, const char *val, const char *parameter)
     {
         LSPString in;
         if (!in.set_native(val))
+        {
+            fprintf(stderr, "Out of memory\n");
             return STATUS_NO_MEM;
+        }
 
         io::InStringSequence is(&in);
         expr::Tokenizer t(&is);
@@ -86,11 +99,16 @@ namespace timbremill
         {
             case expr::TT_IVALUE: fvalue = t.int_value(); break;
             case expr::TT_FVALUE: fvalue = t.float_value(); break;
-            default: return STATUS_INVALID_VALUE;
+            default:
+                fprintf(stderr, "Bad %s value\n", parameter);
+                return STATUS_INVALID_VALUE;
         }
 
         if (t.get_token(expr::TF_GET) != expr::TT_EOF)
+        {
+            fprintf(stderr, "Bad %s value\n", parameter);
             return STATUS_INVALID_VALUE;
+        }
 
         *dst = fvalue;
 
@@ -181,29 +199,45 @@ namespace timbremill
         }
 
         // Override configuration file parameters
-        if ((val = options.get("--out-data")) != NULL)
-            cfg->sOutData.set_native(val);
-        if ((val = options.get("--out-ir")) != NULL)
-            cfg->sOutIR.set_native(val);
+        if ((val = options.get("--file")) != NULL)
+            cfg->sFile.set_native(val);
+        if ((val = options.get("--ir-file")) != NULL)
+            cfg->sIR.sFile.set_native(val);
+        if ((val = options.get("--ir-raw")) != NULL)
+            cfg->sIR.sRaw.set_native(val);
+        if ((val = options.get("--ir-fade-in")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->sIR.fFadeIn, val, "IR fade in")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--ir-fade-out")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->sIR.fFadeOut, val, "IR fade out")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--ir-head-cut")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->sIR.fHeadCut, val, "IR head cut")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--ir-tail-cut")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->sIR.fTailCut, val, "IR tail cut")) != STATUS_OK)
+                return res;
+        }
         if ((val = options.get("--dst-path")) != NULL)
             cfg->sDstPath.set_native(val);
         if ((val = options.get("--src-path")) != NULL)
             cfg->sSrcPath.set_native(val);
         if ((val = options.get("--srate")) != NULL)
         {
-            if ((res = parse_cmdline_int(&cfg->nSampleRate, val)) != STATUS_OK)
-            {
-                fprintf(stderr, "Bad sample rate value\n");
+            if ((res = parse_cmdline_int(&cfg->nSampleRate, val, "sample rate")) != STATUS_OK)
                 return res;
-            }
         }
         if ((val = options.get("--gain-range")) != NULL)
         {
-            if ((res = parse_cmdline_float(&cfg->fGainRange, val)) != STATUS_OK)
-            {
-                fprintf(stderr, "Bad gain range value\n");
+            if ((res = parse_cmdline_float(&cfg->fGainRange, val, "gain range")) != STATUS_OK)
                 return res;
-            }
         }
 
         return STATUS_OK;

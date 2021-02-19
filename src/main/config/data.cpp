@@ -47,13 +47,23 @@ namespace timbremill
         vFiles.flush();
     }
 
+    irfile_t::irfile_t()
+    {
+        fHeadCut        = 0.0f;
+        fTailCut        = 0.0f;
+        fFadeIn         = 0.0f;
+        fFadeOut        = 0.0f;
+
+        sFile.set_ascii("%{master_name}/${file_name} - IR.wav");
+        sRaw.set_ascii("%{master_name}/${file_name} - Raw IR.wav");
+    }
+
     config_t::config_t()
     {
         nSampleRate     = 48000;
         fGainRange      = 48.0f;
 
-        sOutIR.set_ascii("%{master_name}/${file_name} - IR.wav");
-        sOutData.set_ascii("%{master_name}/${file_name} - processed.wav");
+        sFile.set_ascii("%{master_name}/${file_name} - processed.wav");
     }
 
     config_t::~config_t()
