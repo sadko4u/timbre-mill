@@ -156,9 +156,21 @@ namespace timbremill
                 return res;
             }
 
+            // Produce the trimmed IR file
+            if ((res = trim_impulse_response(&ir, &raw_ir, &cfg->sIR)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error trimming impulse response\n");
+                return res;
+            }
+
             // Save the IR file
             raw_ir.set_sample_rate(cfg->nSampleRate);
             if ((res = save_audio_file(&raw_ir, &cfg->sDstPath, &cfg->sIR.sRaw, &vars)) != STATUS_OK)
+                return res;
+
+            // Save the trimmed IR file
+            ir.set_sample_rate(cfg->nSampleRate);
+            if ((res = save_audio_file(&ir, &cfg->sDstPath, &cfg->sIR.sFile, &vars)) != STATUS_OK)
                 return res;
         }
 

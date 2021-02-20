@@ -27,6 +27,7 @@
 #include <lsp-plug.in/dsp-units/sampling/Sample.h>
 #include <lsp-plug.in/expr/Resolver.h>
 
+#include <private/config/config.h>
 
 namespace timbremill
 {
@@ -80,6 +81,19 @@ namespace timbremill
             size_t precision, float db_range
     );
 
+    /**
+     * Perform trimming of impulse response file
+     *
+     * @param dst destination sample to store trimmed data
+     * @param src non-trimmed IR file
+     * @param params trimming parameters
+     * @return status of operation
+     */
+    status_t trim_impulse_response(
+            dspu::Sample *dst,
+            const dspu::Sample *src,
+            const irfile_t *params
+    );
 }
 
 

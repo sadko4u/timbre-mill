@@ -24,6 +24,7 @@
 #include <lsp-plug.in/common/alloc.h>
 #include <lsp-plug.in/dsp/dsp.h>
 #include <lsp-plug.in/dsp-units/misc/windows.h>
+#include <lsp-plug.in/dsp-units/misc/fade.h>
 #include <lsp-plug.in/expr/Expression.h>
 
 namespace timbremill
@@ -349,6 +350,46 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t trim_impulse_response(
+            dspu::Sample *dst,
+            const dspu::Sample *src,
+            const irfile_t *params
+    )
+    {
+        dspu::Sample out;
+
+        // Compute sample parameters
+        ssize_t length  = src->length();
+        ssize_t head    = (lsp_limit(params->fHeadCut, 0.0f, 100.0f) * 0.01f) * length;
+        ssize_t tail    = (lsp_limit(params->fTailCut, 0.0f, 100.0f) * 0.01f) * length;
+        ssize_t fadein  = (lsp_max(params->fFadeIn, 0.0f) * 0.01f) * length;
+        ssize_t fadeout = (lsp_max(params->fFadeOut, 0.0f) * 0.01f) * length;
+        ssize_t count   = lsp_max(length - head - tail, 0);
+
+        // Initialize sample
+        if (!out.init(src->channels(), count, count))
+            return STATUS_NO_MEM;
+
+        if (count > 0)
+        {
+            for (size_t i=0, n=src->channels(); i<n; ++i)
+            {
+                const float *s  = src->channel(i);
+                float *d        = out.channel(i);
+
+                // Copy data to channel and apply fades
+                dsp::copy(d, &s[head], count);
+                dspu::fade_in(d, d, fadein, count);
+                dspu::fade_out(d, d, fadeout, count);
+            }
+        }
+
+        // Save sample
+        out.set_sample_rate(src->sample_rate());
+        dst->swap(&out);
+
+        return STATUS_OK;
+    }
 }
 
 
