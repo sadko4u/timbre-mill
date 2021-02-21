@@ -39,6 +39,7 @@ namespace timbremill
         "-c",   "--config",         "Configuration file name",
         "-d",   "--dst-path",       "Destination path to store audio files",
         "-f",   "--file",           "Format of the output file name",
+        "-fr",  "--fft-rank",       "The FFT rank (resolution) used for profiling",
         "-gr",  "--gain-range",     "Gain dynamic range for building inverse frequency response",
         "-h",   "--help",           "Output this help message",
         "-ir",  "--ir-file",        "Format of the processed impulse response file name",

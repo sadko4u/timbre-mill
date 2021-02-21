@@ -332,6 +332,8 @@ namespace timbremill
                 res = parse_json_config_int(&cfg->nSampleRate, p);
             else if (ev.sValue.equals_ascii("gain_range"))
                 res = parse_json_config_float(&cfg->fGainRange, p);
+            else if (ev.sValue.equals_ascii("fft_rank"))
+                res = parse_json_config_int(&cfg->nFftRank, p);
             else
                 res = p->skip_current();
 

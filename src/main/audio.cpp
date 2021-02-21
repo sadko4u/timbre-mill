@@ -23,9 +23,10 @@
 #include <lsp-plug.in/stdlib/stdio.h>
 #include <lsp-plug.in/common/alloc.h>
 #include <lsp-plug.in/dsp/dsp.h>
+#include <lsp-plug.in/expr/Expression.h>
 #include <lsp-plug.in/dsp-units/misc/windows.h>
 #include <lsp-plug.in/dsp-units/misc/fade.h>
-#include <lsp-plug.in/expr/Expression.h>
+#include <lsp-plug.in/dsp-units/util/Convolver.h>
 
 namespace timbremill
 {
@@ -92,9 +93,9 @@ namespace timbremill
 
         duration_t d;
         calc_duration(&d, sample);
-        fprintf(stdout, "  loaded file: '%s', channels: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
+        fprintf(stdout, "  loaded file: '%s', channels: %d, samples: %d,sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
                 path.as_native(),
-                int(sample->channels()), int(sample->sample_rate()),
+                int(sample->channels()), int(sample->length()), int(sample->sample_rate()),
                 int(d.h), int(d.m), int(d.s), int(d.ms)
         );
 
@@ -179,9 +180,9 @@ namespace timbremill
 
         duration_t d;
         calc_duration(&d, sample);
-        fprintf(stdout, "  saved file: '%s', channels: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
+        fprintf(stdout, "  saved file: '%s', channels: %d, samples: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
                 path.as_native(),
-                int(sample->channels()), int(sample->sample_rate()),
+                int(sample->channels()), int(sample->length()), int(sample->sample_rate()),
                 int(d.h), int(d.m), int(d.s), int(d.ms)
         );
 
@@ -386,6 +387,42 @@ namespace timbremill
 
         // Save sample
         out.set_sample_rate(src->sample_rate());
+        dst->swap(&out);
+
+        return STATUS_OK;
+    }
+
+    status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir)
+    {
+        dspu::Sample out;
+        dspu::Convolver cv;
+
+        // Allocate necessary buffers
+        ssize_t length      = src->length() + ir->length();
+        if (!out.init(src->channels(), length, length))
+            return STATUS_NO_MEM;
+
+        // Allocate buffer for convolution tail
+        uint8_t *ptr;
+        float *buf      = alloc_aligned<float>(ptr, ir->length());
+        if (buf == NULL)
+            return STATUS_NO_MEM;
+        dsp::fill_zero(buf, ir->length());
+
+        for (size_t i=0, n=src->channels(); i<n; ++i)
+        {
+            // Initialize convolver
+            if (!cv.init(ir->channel(i), ir->length(), 16, 0))
+                return STATUS_NO_MEM;
+
+            // Perform convolution
+            float *dp = out.channel(i);
+            cv.process(dp, src->channel(i), src->length());     // The main convolution
+            dp += src->length();
+            cv.process(dp, buf, ir->length());                  // The convolution tail
+        }
+
+        // Save sample
         dst->swap(&out);
 
         return STATUS_OK;

@@ -117,7 +117,7 @@ namespace timbremill
 
         for (size_t i=0, n=fg->vFiles.size(); i<n; ++i)
         {
-            dspu::Sample child, cp, ir, raw_ir;
+            dspu::Sample child, cp, ir, raw_ir, af;
             LSPString *fname = fg->vFiles.uget(i);
             if (fname == NULL)
             {
@@ -159,7 +159,14 @@ namespace timbremill
             // Produce the trimmed IR file
             if ((res = trim_impulse_response(&ir, &raw_ir, &cfg->sIR)) != STATUS_OK)
             {
-                fprintf(stderr, "  error trimming impulse response\n");
+                fprintf(stderr, "  error trimming impulse response, error code: %d\n", int(res));
+                return res;
+            }
+
+            // Convolve the trimmed IR file with the master sample
+            if ((res = convolve(&af, &master, &ir)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
                 return res;
             }
 
@@ -171,6 +178,11 @@ namespace timbremill
             // Save the trimmed IR file
             ir.set_sample_rate(cfg->nSampleRate);
             if ((res = save_audio_file(&ir, &cfg->sDstPath, &cfg->sIR.sFile, &vars)) != STATUS_OK)
+                return res;
+
+            // Save the convolved file
+            af.set_sample_rate(cfg->nSampleRate);
+            if ((res = save_audio_file(&af, &cfg->sDstPath, &cfg->sFile, &vars)) != STATUS_OK)
                 return res;
         }
 

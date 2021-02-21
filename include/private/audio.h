@@ -94,6 +94,16 @@ namespace timbremill
             const dspu::Sample *src,
             const irfile_t *params
     );
+
+    /**
+     * Convolve impulse response with the audio sample and store in another audio sample
+     *
+     * @param dst destination sample to store data
+     * @param src source sample to convolve
+     * @param ir impulse response to convolve
+     * @return status of operation
+     */
+    status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir);
 }
 
 

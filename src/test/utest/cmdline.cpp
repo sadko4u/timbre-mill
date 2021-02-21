@@ -71,7 +71,7 @@ UTEST_BEGIN("timbremill", cmdline)
         }
     }
 
-    void parce_cmdline(timbremill::config_t *cfg)
+    void parse_cmdline(timbremill::config_t *cfg)
     {
         static const char *ext_argv[] =
         {
@@ -110,7 +110,7 @@ UTEST_BEGIN("timbremill", cmdline)
     {
         // Parse configuration from file and cmdline
         timbremill::config_t cfg;
-        parce_cmdline(&cfg);
+        parse_cmdline(&cfg);
 
         // Validate the final configuration
         validate_config(&cfg);
