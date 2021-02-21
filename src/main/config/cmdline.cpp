@@ -29,11 +29,6 @@
 
 namespace timbremill
 {
-    status_t print_usage(const char *name, bool fail)
-    {
-        return (fail) ? STATUS_BAD_ARGUMENTS : STATUS_SKIP;
-    }
-
     static const char *options[] =
     {
         "-c",   "--config",         "Configuration file name",
@@ -53,6 +48,31 @@ namespace timbremill
 
         NULL
     };
+
+    status_t print_usage(const char *name, bool fail)
+    {
+        LSPString buf, fmt;
+        size_t maxlen = 0;
+
+        // Estimate maximum parameter size
+        for (const char **p = timbremill::options; *p != NULL; p += 3)
+        {
+            buf.fmt_ascii("%s, %s", p[0], p[1]);
+            maxlen  = lsp_max(buf.length(), maxlen);
+        }
+        fmt.fmt_ascii("  %%-%ds    %%s\n", int(maxlen));
+
+        // Output usage
+        printf("usage: %s [arguments]\n", name);
+        printf("available arguments:\n");
+        for (const char **p = timbremill::options; *p != NULL; p += 3)
+        {
+            buf.fmt_ascii("%s, %s", p[0], p[1]);
+            printf(fmt.get_native(), buf.get_native(), p[2]);
+        }
+
+        return (fail) ? STATUS_BAD_ARGUMENTS : STATUS_SKIP;
+    }
 
     status_t parse_cmdline_int(ssize_t *dst, const char *val, const char *parameter)
     {
