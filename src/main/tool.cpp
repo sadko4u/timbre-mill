@@ -104,6 +104,10 @@ namespace timbremill
             return STATUS_OK;
         }
 
+        // Check that at least one option is specified to produce
+        if (!cfg->nProduce)
+            return STATUS_OK;
+
         // Read the master file
         if ((res = load_audio_file(&master, cfg->nSampleRate, &cfg->sSrcPath, &fg->sMaster)) != STATUS_OK)
             return res;
@@ -156,34 +160,50 @@ namespace timbremill
                 return res;
             }
 
-            // Produce the trimmed IR file
-            if ((res = trim_impulse_response(&ir, &raw_ir, &cfg->sIR)) != STATUS_OK)
+            // Need to produce raw IR file?
+            if (cfg->nProduce & OUT_RAW)
             {
-                fprintf(stderr, "  error trimming impulse response, error code: %d\n", int(res));
-                return res;
+                // Save the raw IR file
+                raw_ir.set_sample_rate(cfg->nSampleRate);
+                if ((res = save_audio_file(&raw_ir, &cfg->sDstPath, &cfg->sIR.sRaw, &vars)) != STATUS_OK)
+                    return res;
             }
 
-            // Convolve the trimmed IR file with the master sample
-            if ((res = convolve(&af, &master, &ir)) != STATUS_OK)
+            // Need to produce trimmed IR or processed audio file?
+            if (cfg->nProduce & (OUT_IR | OUT_AUDIO))
             {
-                fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
-                return res;
+                // Produce the trimmed IR file
+                if ((res = trim_impulse_response(&ir, &raw_ir, &cfg->sIR)) != STATUS_OK)
+                {
+                    fprintf(stderr, "  error trimming impulse response, error code: %d\n", int(res));
+                    return res;
+                }
+
+                // Need to produce IR file?
+                if (cfg->nProduce & OUT_IR)
+                {
+                    // Save the trimmed IR file
+                    ir.set_sample_rate(cfg->nSampleRate);
+                    if ((res = save_audio_file(&ir, &cfg->sDstPath, &cfg->sIR.sFile, &vars)) != STATUS_OK)
+                        return res;
+                }
+
+                // Need to produce audio file?
+                if (cfg->nProduce & OUT_AUDIO)
+                {
+                    // Convolve the trimmed IR file with the master sample
+                    if ((res = convolve(&af, &master, &ir)) != STATUS_OK)
+                    {
+                        fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
+                        return res;
+                    }
+
+                    // Save the convolved file
+                    af.set_sample_rate(cfg->nSampleRate);
+                    if ((res = save_audio_file(&af, &cfg->sDstPath, &cfg->sFile, &vars)) != STATUS_OK)
+                        return res;
+                }
             }
-
-            // Save the IR file
-            raw_ir.set_sample_rate(cfg->nSampleRate);
-            if ((res = save_audio_file(&raw_ir, &cfg->sDstPath, &cfg->sIR.sRaw, &vars)) != STATUS_OK)
-                return res;
-
-            // Save the trimmed IR file
-            ir.set_sample_rate(cfg->nSampleRate);
-            if ((res = save_audio_file(&ir, &cfg->sDstPath, &cfg->sIR.sFile, &vars)) != STATUS_OK)
-                return res;
-
-            // Save the convolved file
-            af.set_sample_rate(cfg->nSampleRate);
-            if ((res = save_audio_file(&af, &cfg->sDstPath, &cfg->sFile, &vars)) != STATUS_OK)
-                return res;
         }
 
         return STATUS_OK;

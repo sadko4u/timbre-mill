@@ -2,6 +2,8 @@
 * RECENT CHANGES
 *******************************************************************************
 
-=== 0.5.0 ===
+=== 0.5.1 ===
+* Added 'produce' option support to configuration file and command line.
 
-Initial release.
+=== 0.5.0 ===
+* Initial release.

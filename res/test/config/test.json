@@ -5,6 +5,8 @@
 	"gain_range": 72,
 	"fft_rank": 16,
 	
+	"produce": [ "raw", "audio" ],
+	
 	"file": "%{master_name}/test-${file_name} - processed.wav",
 	
 	"ir": {

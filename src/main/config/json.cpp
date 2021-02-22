@@ -80,6 +80,48 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t parse_json_config_flags(ssize_t *dst, const cfg_flag_t *flags, json::Parser *p)
+    {
+        json::event_t ev;
+        ssize_t xdst = 0;
+
+        // Should be JSON object
+        status_t res = p->read_next(&ev);
+        if (res != STATUS_OK)
+            return res;
+        else if (ev.type != json::JE_ARRAY_START)
+            return STATUS_BAD_TYPE;
+
+        // Read group object
+        while (true)
+        {
+            // Read property name
+            res = p->read_next(&ev);
+            if (res != STATUS_OK)
+                return res;
+            else if (ev.type == json::JE_ARRAY_END)
+                break;
+            else if (ev.type != json::JE_STRING)
+                return STATUS_BAD_FORMAT;
+
+            // Parse flag
+            const cfg_flag_t *xf = find_config_flag(&ev.sValue, flags);
+            if (xf != NULL)
+                xdst |= xf->value;
+            else
+                fprintf(stderr, "Warning: unknown flag '%s'\n", ev.sValue.get_native());
+
+            // Analyze result
+            if (res != STATUS_OK)
+                break;
+        }
+
+        // Return success result
+        *dst = xdst;
+
+        return res;
+    }
+
     status_t parse_json_config_group_files(fgroup_t *grp, json::Parser *p)
     {
         json::event_t ev;
@@ -334,6 +376,8 @@ namespace timbremill
                 res = parse_json_config_float(&cfg->fGainRange, p);
             else if (ev.sValue.equals_ascii("fft_rank"))
                 res = parse_json_config_int(&cfg->nFftRank, p);
+            else if (ev.sValue.equals_ascii("produce"))
+                res = parse_json_config_flags(&cfg->nProduce, produce_flags, p);
             else
                 res = p->skip_current();
 

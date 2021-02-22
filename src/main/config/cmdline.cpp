@@ -19,13 +19,15 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <private/config/cmdline.h>
-#include <private/config/config.h>
 #include <lsp-plug.in/lltl/pphash.h>
 #include <lsp-plug.in/stdlib/string.h>
 #include <lsp-plug.in/stdlib/stdio.h>
 #include <lsp-plug.in/io/InStringSequence.h>
 #include <lsp-plug.in/expr/Tokenizer.h>
+
+#include <private/config/data.h>
+#include <private/config/cmdline.h>
+#include <private/config/config.h>
 
 namespace timbremill
 {
@@ -42,11 +44,65 @@ namespace timbremill
         "-ifo", "--ir-fade-out",    "The amount (in %) of fade-out for the IR file",
         "-ihc", "--ir-head-cut",    "The amount (in %) of head cut for the IR file",
         "-itc", "--ir-tail-cut",    "The amount (in %) of tail cut for the IR file",
+        "-p",   "--produce",        "Comma-separated list of produced output files (ir,raw,audio,all)",
         "-s",   "--src-path",       "Source path to take files from",
         "-sr",  "--srate",          "Sample rate of output files",
 
         NULL
     };
+
+    status_t parse_cmdline_flags(ssize_t *dst, const char *name, const char *value, const cfg_flag_t *flags)
+    {
+        // Parse values
+        size_t n = 0;
+        io::InStringSequence is;
+        expr::Tokenizer tok(&is);
+        status_t res = STATUS_OK;
+        size_t xdst  = 0;
+        const cfg_flag_t *xf;
+
+        if ((res = is.wrap(value)) != STATUS_OK)
+        {
+            fprintf(stderr, "Error parsing argument '%s', error code: %d\n", name, int(res));
+            return res;
+        }
+
+        while ((res = tok.get_token(expr::TF_GET | expr::TF_XKEYWORDS)) != expr::TT_EOF)
+        {
+            if (n > 0)
+            {
+                if (tok.current() != expr::TT_COMMA)
+                {
+                    fprintf(stderr, "Argument '%s': invalid syntax\n", name);
+                    return STATUS_BAD_FORMAT;
+                }
+                if ((res = tok.get_token(expr::TF_GET | expr::TF_XKEYWORDS)) == expr::TT_EOF)
+                {
+                    fprintf(stderr, "Argument '%s': invalid syntax\n", name);
+                    return STATUS_BAD_FORMAT;
+                }
+            }
+
+            if (tok.current() != expr::TT_BAREWORD)
+            {
+                fprintf(stderr, "Argument '%s': invalid syntax\n", name);
+                return STATUS_BAD_FORMAT;
+            }
+
+            if ((xf = find_config_flag(tok.text_value(), flags)) == NULL)
+            {
+                fprintf(stderr, "Argument '%s': unknown value '%s'\n", name, tok.text_value()->get_native());
+                return STATUS_BAD_FORMAT;
+            }
+
+            xdst   |= xf->value;
+            ++n;
+        }
+
+        *dst    = xdst;
+
+        return STATUS_OK;
+    }
 
     status_t print_usage(const char *name, bool fail)
     {
@@ -87,13 +143,13 @@ namespace timbremill
         {
             case expr::TT_IVALUE: ivalue = t.int_value(); break;
             default:
-                fprintf(stderr, "Bad %s value\n", parameter);
+                fprintf(stderr, "Bad '%s' value\n", parameter);
                 return STATUS_INVALID_VALUE;
         }
 
         if (t.get_token(expr::TF_GET) != expr::TT_EOF)
         {
-            fprintf(stderr, "Bad %s value\n", parameter);
+            fprintf(stderr, "Bad '%s' value\n", parameter);
             return STATUS_INVALID_VALUE;
         }
 
@@ -120,13 +176,13 @@ namespace timbremill
             case expr::TT_IVALUE: fvalue = t.int_value(); break;
             case expr::TT_FVALUE: fvalue = t.float_value(); break;
             default:
-                fprintf(stderr, "Bad %s value\n", parameter);
+                fprintf(stderr, "Bad '%s' value\n", parameter);
                 return STATUS_INVALID_VALUE;
         }
 
         if (t.get_token(expr::TF_GET) != expr::TT_EOF)
         {
-            fprintf(stderr, "Bad %s value\n", parameter);
+            fprintf(stderr, "Bad '%s' value\n", parameter);
             return STATUS_INVALID_VALUE;
         }
 
@@ -262,6 +318,11 @@ namespace timbremill
         if ((val = options.get("--gain-range")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->fGainRange, val, "gain range")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--produce")) != NULL)
+        {
+            if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
                 return res;
         }
 
