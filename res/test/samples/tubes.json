@@ -1,0 +1,37 @@
+{
+	"srate": 48000,
+	"dst_path": "tmp",
+	"src_path": "res/test/samples",
+	"file": "${group}/${master_name}/${file_name} - processed.wav",
+	"fft_rank": 16,
+	
+	"ir": {
+		"head_cut": 45,
+		"tail_cut": 5,
+		"fade_in": 2,
+		"fade_out": 50,
+		"file": "${group}/${master_name}/${file_name} - IR.wav",
+		"raw": "${group}/${master_name}/${file_name} - Raw IR.wav"
+	},
+
+	"groups": {
+		"trombone": {
+			"master": "trombone/trb unmuted.wav",
+			"files": [
+				"trombone/trb harmon stem in.wav",
+				"trombone/trb humes and berg cup.wav",
+				"trombone/trb plunger.wav",
+				"trombone/trb solotone.wav",
+				"trombone/trb tom crown straight.wav"
+			]
+		},
+		"trumpet": {
+			"master": "trumpet/trp unmuted.wav",
+			"files": [
+				"trumpet/trp alessi vacchiano straight.wav",
+				"trumpet/trp jo ral bubble stem out.wav",
+				"trumpet/trp plunger.wav"
+			]
+		}
+	}
+}

@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2021 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 31 мар. 2020 г.
+ * Created on: 15 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,13 +19,28 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/test-fw/main.h>
+#include <lsp-plug.in/test-fw/mtest.h>
+#include <lsp-plug.in/lltl/parray.h>
 
-#ifndef LSP_BUILTIN_MODULE
-    int main(int argc, const char **argv)
+namespace timbremill
+{
+    int main(int argc, const char **argv);
+}
+
+MTEST_BEGIN("timbremill", main)
+
+    MTEST_MAIN
     {
-        lsp::test::main(argc, argv);
+        lltl::parray<char> args;
+        args.add(const_cast<char *>(full_name()));
+
+        for (ssize_t i=0; i < argc; ++i)
+            args.add(const_cast<char *>(argv[i]));
+
+        timbremill::main(args.size(), const_cast<const char **>(args.array()));
     }
-#endif
+
+MTEST_END
+
 
 

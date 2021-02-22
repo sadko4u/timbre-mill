@@ -1,0 +1,36 @@
+{
+	"srate": 44100,
+	"src_path": "/home/test",
+	"dst_path": "/home/out",
+	"gain_range": 72,
+	"fft_rank": 16,
+	
+	"file": "%{master_name}/test-${file_name} - processed.wav",
+	
+	"ir": {
+		"head_cut": 45,
+		"tail_cut": 5,
+		"fade_in": 2,
+		"fade_out": 50,
+		"file": "%{master_name}/test-${file_name} - IR.wav",
+		"raw": "%{master_name}/test-${file_name} - Raw IR.wav"
+	},
+
+	"groups": {
+		"group1": {
+			"master": "file1.wav",
+			"files": [
+				"out-file1.wav",
+				"out-file2.wav",
+				"out-file3.wav"
+			]
+		},
+		"group2": {
+			"master": "a.wav",
+			"files": [
+				"a-out.wav",
+				"b-out.wav"
+			]
+		}
+	}
+}

@@ -3,7 +3,7 @@
  *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 10 февр. 2021 г.
+ * Created on: 22 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,13 +19,24 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/dsp/dsp.h>
+#ifndef PRIVATE_CONFIG_TOOL_H_
+#define PRIVATE_CONFIG_TOOL_H_
 
-#include <private/tool.h>
+#include <lsp-plug.in/common/types.h>
+#include <lsp-plug.in/runtime/LSPString.h>
+#include <lsp-plug.in/expr/Variables.h>
 
-#ifndef LSP_IDE_DEBUG
-    int main(int argc, const char **argv)
-    {
-        return timbremill::main(argc, argv);
-    }
-#endif /* LSP_IDE_DEBUG */
+#include <private/config/config.h>
+
+namespace timbremill
+{
+    status_t build_variables(expr::Variables *vars, config_t *cfg, fgroup_t *fg, LSPString *master, LSPString *child);
+
+    status_t process_file_group(config_t *cfg, fgroup_t *fg);
+
+    status_t process_file_groups(config_t *cfg);
+
+    int main(int argc, const char **argv);
+}
+
+#endif /* PRIVATE_CONFIG_TOOL_H_ */

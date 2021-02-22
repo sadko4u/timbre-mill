@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2021 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 31 мар. 2020 г.
+ * Created on: 11 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,13 +19,11 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/test-fw/main.h>
-
-#ifndef LSP_BUILTIN_MODULE
-    int main(int argc, const char **argv)
-    {
-        lsp::test::main(argc, argv);
-    }
-#endif
+#ifndef PRIVATE_CONFIG_PARSE_H_
+#define PRIVATE_CONFIG_PARSE_H_
 
 
+
+
+
+#endif /* INCLUDE_PRIVATE_CONFIG_PARSE_H_ */

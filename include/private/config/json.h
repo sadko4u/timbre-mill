@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2020 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2020 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2021 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of timbre-mill
- * Created on: 31 мар. 2020 г.
+ * Created on: 10 февр. 2021 г.
  *
  * timbre-mill is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,13 +19,25 @@
  * along with timbre-mill. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <lsp-plug.in/test-fw/main.h>
+#ifndef PRIVATE_CONFIG_JSON_H_
+#define PRIVATE_CONFIG_JSON_H_
 
-#ifndef LSP_BUILTIN_MODULE
-    int main(int argc, const char **argv)
-    {
-        lsp::test::main(argc, argv);
-    }
-#endif
+#include <private/config/config.h>
+#include <lsp-plug.in/io/IInSequence.h>
 
+namespace timbremill
+{
+    using namespace lsp;
 
+    /**
+     * Parse configuration file in JSON format
+     *
+     * @param cfg configuration to update
+     * @param is input stream
+     * @return status of operation
+     */
+    status_t parse_json_config(config_t *cfg, io::IInSequence *is);
+
+}
+
+#endif /* PRIVATE_CONFIG_JSON_H_ */
