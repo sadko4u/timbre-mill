@@ -117,6 +117,8 @@ The following packages need to be installed for building:
 
 * gcc >= 4.9
 * GNU make >= 4.0
+* libsndfile
+* libiconv
 
 Building
 ======
