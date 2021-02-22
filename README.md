@@ -32,6 +32,7 @@ The example of batch file is the following:
 	"src_path": "/home/user/in",
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
 	"fft_rank": 16,
+	"produce": [ "ir", "audio" ],
 	
 	"ir": {
 		"head_cut": 45,
@@ -66,11 +67,12 @@ The example of batch file is the following:
 ```
 
 Here's the full description of all possible parameters which can be omitted in the batch:
-  * **srate** - the sample rate for output files (IR, stripped IR and the processed master files), default 48000;
   * **dst_path** - destination path to store output files (empty by default);
-  * **src_path** - source path to take files from (empty by default);
-  * **file** - the format of the processed audio file name, by default "${master_name}/${file_name} - processed.wav";
   * **fft_rank** - the FFT rank (from 8 to 16) to use for the analysis, 12 by default (4096 samples);
+  * **file** - the format of the processed audio file name, by default "${master_name}/${file_name} - processed.wav";
+  * **groups** - the key-value map between group name and it's description:
+    * **master** - the name of the master file (absolute path name or relative to the **src_path** directory);
+    * **files** - the list of child files (absolute path name or relative to the **src_path** directory).
   * **ir** - the parameters of output IR file:
     * **head_cut** - the amount of data (in percent) to cut from the IR file at the beginning;
     * **tail_cut** - the amount of data (in percent) to cut from the IR file at the end;
@@ -78,19 +80,23 @@ Here's the full description of all possible parameters which can be omitted in t
     * **fade_out** - the amount of linear fade-in (in percent) to add at the end of the IR file;
     * **file** - the name of the stripped impulse response file, by default "${master_name}/${file_name} - IR.wav";
     * **raw** - the name of the raw impulse response file, by default "${master_name}/${file_name} - Raw IR.wav";
-  * **groups** - the key-value map between group name and it's description:
-    * **master** - the name of the master file (absolute path name or relative to the **src_path** directory);
-    * **files** - the list of child files (absolute path name or relative to the **src_path** directory).
+  * **produce** - the array of strings that indicates the list of files to produce, ```[ "all" ]``` by default:
+    * **all** - produce all types of files: IR, raw IR, processed audio;
+    * **audio** - produce processed audio file;
+    * **ir** - produce IR file;
+    * **raw** - produce raw IR file;
+  * **srate** - the sample rate for output files (IR, stripped IR and the processed master files), default 48000;
+  * **src_path** - source path to take files from (empty by default);
 
 Each name of the output file can be parametrized with the following predefined values:
-  * **srate** - the sample rate of output file;
+  * **file** - the name of the child file without any parent directory, for example "trp plunger.wav";
+  * **file_ext** - the extension of the child file for example "wav";
+  * **file_name** - the name of the child  file without any parent directory and additionally removed file extension, for example "trp plunger";
   * **group** - the name of the group related to the file;
   * **master** - the name of the master file without any parent directory, for example "trp unmuted.wav";
-  * **master_name** - the name of the master file without any parent directory and additionally removed file extension, for example "trp unmuted";
   * **master_ext** - the extension of the master file for example "wav";
-  * **file** - the name of the child file without any parent directory, for example "trp plunger.wav";
-  * **file_name** - the name of the child  file without any parent directory and additionally removed file extension, for example "trp plunger";
-  * **file_ext** - the extension of the child file for example "wav";
+  * **master_name** - the name of the master file without any parent directory and additionally removed file extension, for example "trp unmuted";
+  * **srate** - the sample rate of output file.
     
 The tool allows to override some batch parameters by specifying them as command-line arguments. The full list can be obtained by issuing ```timbre-mill --help``` command and is the following:
 
@@ -106,6 +112,7 @@ The tool allows to override some batch parameters by specifying them as command-
   -ifo, --ir-fade-out    The amount (in %) of fade-out for the IR file
   -ihc, --ir-head-cut    The amount (in %) of head cut for the IR file
   -itc, --ir-tail-cut    The amount (in %) of tail cut for the IR file
+  -p, --produce          Comma-separated list of produced output files (ir,raw,audio,all)
   -s, --src-path         Source path to take files from
   -sr, --srate           Sample rate of output files
 ```

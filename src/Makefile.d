@@ -133,27 +133,27 @@ $(TIMBRE_MILL_BIN)/main/config/config.o: main/config/config.cpp \
  $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/IOutSequence.h \
  $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/InMarkSequence.h
 $(TIMBRE_MILL_BIN)/main/config/cmdline.o: main/config/cmdline.cpp \
- $(TIMBRE_MILL_INC)/private/config/cmdline.h \
- $(LSP_COMMON_LIB_INC)/lsp-plug.in/common/status.h \
+ $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/pphash.h \
+ $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/version.h \
+ $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/types.h \
+ $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/spec.h \
+ $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/parray.h \
+ $(LSP_COMMON_LIB_INC)/lsp-plug.in/stdlib/string.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/common/version.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/common/types.h \
- $(TIMBRE_MILL_INC)/private/config/data.h \
- $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/parray.h \
- $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/version.h \
- $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/spec.h \
- $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/types.h \
- $(LSP_LLTL_LIB_INC)/lsp-plug.in/lltl/pphash.h \
- $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/runtime/LSPString.h \
- $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/runtime/version.h \
- $(LSP_COMMON_LIB_INC)/lsp-plug.in/stdlib/string.h \
- $(TIMBRE_MILL_INC)/private/config/config.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/stdlib/stdio.h \
- $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/Path.h \
- $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/IInSequence.h \
- $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/IInStream.h \
  $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/InStringSequence.h \
+ $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/runtime/version.h \
+ $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/runtime/LSPString.h \
+ $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/IInSequence.h \
+ $(LSP_COMMON_LIB_INC)/lsp-plug.in/common/status.h \
  $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/expr/Tokenizer.h \
- $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/expr/token.h
+ $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/expr/token.h \
+ $(TIMBRE_MILL_INC)/private/config/data.h \
+ $(TIMBRE_MILL_INC)/private/config/cmdline.h \
+ $(TIMBRE_MILL_INC)/private/config/config.h \
+ $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/Path.h \
+ $(LSP_RUNTIME_LIB_INC)/lsp-plug.in/io/IInStream.h
 $(TIMBRE_MILL_BIN)/main/audio.o: main/audio.cpp \
  $(TIMBRE_MILL_INC)/private/audio.h \
  $(LSP_COMMON_LIB_INC)/lsp-plug.in/common/status.h \
