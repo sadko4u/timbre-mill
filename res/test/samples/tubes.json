@@ -3,6 +3,7 @@
 	"dst_path": "tmp",
 	"src_path": "res/test/samples",
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
+	"produce": [ "ir", "audio" ],
 	"fft_rank": 16,
 	
 	"ir": {
