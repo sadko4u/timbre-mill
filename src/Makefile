@@ -136,14 +136,14 @@ $(ARTIFACT_TEST_BIN): $(ARTIFACT_DEPS) $(ARTIFACT_OBJ) $(ARTIFACT_TEST_OBJ)
 install: all
 	@echo "Installing $($(ARTIFACT_ID)_NAME)"
 	@mkdir -p "$(DESTDIR)$(BINDIR)"
-	@cp $(ARTIFACT_EXE) -t "$(DESTDIR)$(LIBDIR)"
+	@cp $(ARTIFACT_EXE) -t "$(DESTDIR)$(BINDIR)"
 	@ln -sf $(notdir $(ARTIFACT_EXE)) "$(DESTDIR)$(BINDIR)/$(ARTIFACT_EXELINK)"
 	@echo "Install OK"
 
 uninstall:
 	@echo "Uninstalling $($(ARTIFACT_ID)_NAME)"
 	@-rm -f "$(DESTDIR)$(BINDIR)/$(ARTIFACT_EXELINK)"
-	@-rm -f "$(DESTDIR)$(BINDIR)/$(ARTIFACT_EXE)"
+	@-rm -f "$(DESTDIR)$(BINDIR)/$(notdir $(ARTIFACT_EXE))"
 	@echo "Uninstall OK"
 
 # Dependencies
