@@ -54,8 +54,8 @@ namespace timbremill
         fFadeIn         = 0.0f;
         fFadeOut        = 0.0f;
 
-        sFile.set_ascii("%{master_name}/${file_name} - IR.wav");
-        sRaw.set_ascii("%{master_name}/${file_name} - Raw IR.wav");
+        sFile.set_ascii("${master_name}/${file_name} - IR.wav");
+        sRaw.set_ascii("${master_name}/${file_name} - Raw IR.wav");
     }
 
     config_t::config_t()
@@ -64,7 +64,7 @@ namespace timbremill
         nFftRank        = 12; // 4096 samples
         fGainRange      = 48.0f;
 
-        sFile.set_ascii("%{master_name}/${file_name} - processed.wav");
+        sFile.set_ascii("${master_name}/${file_name} - processed.wav");
     }
 
     config_t::~config_t()

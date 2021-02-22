@@ -31,11 +31,10 @@ namespace timbremill
 {
     static const char *options[] =
     {
-        "-c",   "--config",         "Configuration file name",
+        "-c",   "--config",         "Configuration file name (required)",
         "-d",   "--dst-path",       "Destination path to store audio files",
         "-f",   "--file",           "Format of the output file name",
         "-fr",  "--fft-rank",       "The FFT rank (resolution) used for profiling",
-        "-gr",  "--gain-range",     "Gain dynamic range for building inverse frequency response",
         "-h",   "--help",           "Output this help message",
         "-ir",  "--ir-file",        "Format of the processed impulse response file name",
         "-iw",  "--ir-raw",         "Format of the raw impulse response file name",
@@ -43,8 +42,8 @@ namespace timbremill
         "-ifo", "--ir-fade-out",    "The amount (in %) of fade-out for the IR file",
         "-ihc", "--ir-head-cut",    "The amount (in %) of head cut for the IR file",
         "-itc", "--ir-tail-cut",    "The amount (in %) of tail cut for the IR file",
-        "-sr",  "--srate",          "Sample rate of output files",
         "-s",   "--src-path",       "Source path to take files from",
+        "-sr",  "--srate",          "Sample rate of output files",
 
         NULL
     };

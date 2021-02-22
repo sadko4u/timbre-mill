@@ -38,7 +38,6 @@ UTEST_BEGIN("timbremill", cmdline)
         // Validate root parameters
         UTEST_ASSERT(cfg->nSampleRate == 88200);
         UTEST_ASSERT(cfg->nFftRank == 8);
-        UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 36.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/user/in"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/user/out"));
         UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("%{master_name}-${file_name} - IR.wav"));
@@ -76,7 +75,6 @@ UTEST_BEGIN("timbremill", cmdline)
         static const char *ext_argv[] =
         {
             "-d",   "/home/user/out",
-            "-gr",  "36",
             "-f",   "%{master_name}-${file_name} - processed.wav",
             "-fr",  "8",
             "-ir",  "%{master_name}-${file_name} - IR.wav",
