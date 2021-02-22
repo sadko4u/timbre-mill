@@ -25,6 +25,15 @@ namespace timbremill
 {
     using namespace lsp;
 
+    const cfg_flag_t produce_flags[] =
+    {
+        { "ir",     OUT_IR      },
+        { "raw",    OUT_RAW     },
+        { "audio",  OUT_AUDIO   },
+        { "all",    OUT_ALL     },
+        { NULL,     0           }
+    };
+
 
     fgroup_t::fgroup_t()
     {
@@ -63,6 +72,7 @@ namespace timbremill
         nSampleRate     = 48000;
         nFftRank        = 12; // 4096 samples
         fGainRange      = 48.0f;
+        nProduce        = OUT_ALL;
 
         sFile.set_ascii("${master_name}/${file_name} - processed.wav");
     }
@@ -87,5 +97,14 @@ namespace timbremill
         groups.flush();
     }
 
+    const cfg_flag_t *find_config_flag(const LSPString *s, const cfg_flag_t *flags)
+    {
+        for (size_t i=0; (flags != NULL) && (flags->name != NULL); ++i, ++flags)
+        {
+            if (s->equals_ascii_nocase(flags->name))
+                return flags;
+        }
+        return NULL;
+    }
 }
 

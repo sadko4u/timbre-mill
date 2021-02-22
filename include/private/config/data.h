@@ -31,6 +31,21 @@ namespace timbremill
 {
     using namespace lsp;
 
+    enum fproduce_t
+    {
+        OUT_IR      = 1 << 0,
+        OUT_RAW     = 1 << 1,
+        OUT_AUDIO   = 1 << 2,
+
+        OUT_ALL     = OUT_IR | OUT_RAW | OUT_AUDIO
+    };
+
+    typedef struct cfg_flag_t
+    {
+        const char     *name;
+        ssize_t         value;
+    } cfg_flag_t;
+
     /**
      * File group
      */
@@ -86,6 +101,7 @@ namespace timbremill
             LSPString                               sFile;          // Format of data output file name
             ssize_t                                 nSampleRate;    // Sample rate for output files
             ssize_t                                 nFftRank;       // FFT rank
+            ssize_t                                 nProduce;       // List of files to produce (flags)
             float                                   fGainRange;     // Gain range (in decibels)
             irfile_t                                sIR;            // IR file data
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
@@ -98,6 +114,19 @@ namespace timbremill
             void clear();
     };
 
+
+    /**
+     * Flags for 'produce' option of the configuration
+     */
+    extern const cfg_flag_t     produce_flags[];
+
+    /**
+     * Find flag by given name
+     * @param s name of the flag
+     * @param flags list of available flags
+     * @return pointer to found flag descriptor or NULL
+     */
+    const cfg_flag_t           *find_config_flag(const LSPString *s, const cfg_flag_t *flags);
 }
 
 #endif /* PRIVATE_CONFIG_DATA_H_ */
