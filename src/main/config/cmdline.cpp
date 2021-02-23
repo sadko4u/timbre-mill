@@ -35,6 +35,7 @@ namespace timbremill
     {
         "-c",   "--config",         "Configuration file name (required)",
         "-d",   "--dst-path",       "Destination path to store audio files",
+        "-dg",  "--dry",            "The amount (in dB) of unprocessed signal in output file",
         "-f",   "--file",           "Format of the output file name",
         "-fr",  "--fft-rank",       "The FFT rank (resolution) used for profiling",
         "-h",   "--help",           "Output this help message",
@@ -47,6 +48,7 @@ namespace timbremill
         "-p",   "--produce",        "Comma-separated list of produced output files (ir,raw,audio,all)",
         "-s",   "--src-path",       "Source path to take files from",
         "-sr",  "--srate",          "Sample rate of output files",
+        "-wg",  "--wet",            "The amount (in dB) of processed signal in output file",
 
         NULL
     };
@@ -323,6 +325,16 @@ namespace timbremill
         if ((val = options.get("--produce")) != NULL)
         {
             if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--dry")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fDry, val, "dry")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--wet")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fWet, val, "wet")) != STATUS_OK)
                 return res;
         }
 

@@ -2,6 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.2 ===
+* Added 'dry' and 'wet' parameters for setting up balance between processed
+  and unprocessed signal in output files.
+
 === 0.5.1 ===
 * Added 'produce' option support to configuration file and command line.
 

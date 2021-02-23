@@ -33,6 +33,8 @@ The example of batch file is the following:
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
 	"fft_rank": 16,
 	"produce": [ "ir", "audio" ],
+	"dry" : -12,
+	"wet" : 0,
 	
 	"ir": {
 		"head_cut": 45,
@@ -67,12 +69,13 @@ The example of batch file is the following:
 ```
 
 Here's the full description of all possible parameters which can be omitted in the batch:
+  * **dry** - the loudness of dry (unprocessed) signal in dB in the output audio file, by default -1000 dB;
   * **dst_path** - destination path to store output files (empty by default);
   * **fft_rank** - the FFT rank (from 8 to 16) to use for the analysis, 12 by default (4096 samples);
   * **file** - the format of the processed audio file name, by default "${master_name}/${file_name} - processed.wav";
   * **groups** - the key-value map between group name and it's description:
     * **master** - the name of the master file (absolute path name or relative to the **src_path** directory);
-    * **files** - the list of child files (absolute path name or relative to the **src_path** directory).
+    * **files** - the list of child files (absolute path name or relative to the **src_path** directory);
   * **ir** - the parameters of output IR file:
     * **head_cut** - the amount of data (in percent) to cut from the IR file at the beginning;
     * **tail_cut** - the amount of data (in percent) to cut from the IR file at the end;
@@ -87,6 +90,10 @@ Here's the full description of all possible parameters which can be omitted in t
     * **raw** - produce raw IR file;
   * **srate** - the sample rate for output files (IR, stripped IR and the processed master files), default 48000;
   * **src_path** - source path to take files from (empty by default);
+  * **wet** - the loudness of wet (processed) signal in dB in the output audio file, by default 0 dB.
+
+For the **dry**/**wet** balance values below -150 dB are considered as negative infinite gain.
+The values above 150 dB are constrained to +150 dB.
 
 Each name of the output file can be parametrized with the following predefined values:
   * **file** - the name of the child file without any parent directory, for example "trp plunger.wav";
@@ -103,6 +110,7 @@ The tool allows to override some batch parameters by specifying them as command-
 ```
   -c, --config           Configuration file name (required)
   -d, --dst-path         Destination path to store audio files
+  -dg, --dry             The amount (in dB) of unprocessed signal in output file
   -f, --file             Format of the output file name
   -fr, --fft-rank        The FFT rank (resolution) used for profiling
   -h, --help             Output help message
@@ -115,6 +123,7 @@ The tool allows to override some batch parameters by specifying them as command-
   -p, --produce          Comma-separated list of produced output files (ir,raw,audio,all)
   -s, --src-path         Source path to take files from
   -sr, --srate           Sample rate of output files
+  -wg, --wet             The amount (in dB) of processed signal in output file
 ```
 
 Requirements

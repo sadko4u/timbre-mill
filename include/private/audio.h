@@ -87,10 +87,12 @@ namespace timbremill
      * @param dst destination sample to store trimmed data
      * @param src non-trimmed IR file
      * @param params trimming parameters
+     * @param latency the output latency of the impulse response
      * @return status of operation
      */
     status_t trim_impulse_response(
             dspu::Sample *dst,
+            ssize_t *latency,
             const dspu::Sample *src,
             const irfile_t *params
     );
@@ -101,9 +103,12 @@ namespace timbremill
      * @param dst destination sample to store data
      * @param src source sample to convolve
      * @param ir impulse response to convolve
+     * @param latency
+     * @param dry the amount of dry (unprocessed signal) in gain units (1.0f = 0 dB)
+     * @param wet the amount of wet (processed signal) in gain units (1.0f = 0 dB)
      * @return status of operation
      */
-    status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir);
+    status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir, ssize_t latency, float dry, float wet);
 }
 
 
