@@ -5,6 +5,8 @@
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
 	"produce": [ "ir", "audio" ],
 	"fft_rank": 16,
+	"dry" : -1000,
+	"wet" : 0,
 	
 	"ir": {
 		"head_cut": 45,

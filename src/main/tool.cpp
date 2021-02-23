@@ -22,14 +22,17 @@
 #include <lsp-plug.in/common/types.h>
 #include <lsp-plug.in/dsp/dsp.h>
 #include <lsp-plug.in/dsp-units/sampling/Sample.h>
+#include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/expr/Variables.h>
 
 #include <private/config/config.h>
 #include <private/config/cmdline.h>
 #include <private/audio.h>
 
-#define FFT_MIN     8
-#define FFT_MAX     16
+#define FFT_MIN         8
+#define FFT_MAX         16
+#define DRYWET_MIN      -150.0f
+#define DRYWET_MAX      150.0f
 
 namespace timbremill
 {
@@ -85,12 +88,23 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    float drywet_to_gain(float amount)
+    {
+        if (amount <= DRYWET_MIN)
+            return 0.0f;
+
+        amount      = lsp_min(amount, DRYWET_MAX);
+        return dspu::db_to_gain(amount);
+    }
+
     status_t process_file_group(config_t *cfg, fgroup_t *fg)
     {
         dspu::Sample master, mp;
         expr::Variables vars;
         status_t res;
         ssize_t fft_rank    = lsp_limit(cfg->nFftRank, FFT_MIN, FFT_MAX);
+        float dry           = drywet_to_gain(cfg->fDry);
+        float wet           = drywet_to_gain(cfg->fWet);
 
         // Analyze group settings
         if (fg->sMaster.is_empty())
@@ -172,12 +186,15 @@ namespace timbremill
             // Need to produce trimmed IR or processed audio file?
             if (cfg->nProduce & (OUT_IR | OUT_AUDIO))
             {
+                ssize_t latency = 0;
+
                 // Produce the trimmed IR file
-                if ((res = trim_impulse_response(&ir, &raw_ir, &cfg->sIR)) != STATUS_OK)
+                if ((res = trim_impulse_response(&ir, &latency, &raw_ir, &cfg->sIR)) != STATUS_OK)
                 {
                     fprintf(stderr, "  error trimming impulse response, error code: %d\n", int(res));
                     return res;
                 }
+                printf("  trimmed IR latency (samples): %d\n", int(latency));
 
                 // Need to produce IR file?
                 if (cfg->nProduce & OUT_IR)
@@ -192,7 +209,7 @@ namespace timbremill
                 if (cfg->nProduce & OUT_AUDIO)
                 {
                     // Convolve the trimmed IR file with the master sample
-                    if ((res = convolve(&af, &master, &ir)) != STATUS_OK)
+                    if ((res = convolve(&af, &master, &ir, latency, dry, wet)) != STATUS_OK)
                     {
                         fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
                         return res;

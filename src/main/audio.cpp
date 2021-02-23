@@ -353,6 +353,7 @@ namespace timbremill
 
     status_t trim_impulse_response(
             dspu::Sample *dst,
+            ssize_t *latency,
             const dspu::Sample *src,
             const irfile_t *params
     )
@@ -388,27 +389,32 @@ namespace timbremill
         // Save sample
         out.set_sample_rate(src->sample_rate());
         dst->swap(&out);
+        *latency        = (length >> 1) - head; // Output latency of the sample
 
         return STATUS_OK;
     }
 
-    status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir)
+    status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir, ssize_t latency, float dry, float wet)
     {
         dspu::Sample out;
         dspu::Convolver cv;
 
         // Allocate necessary buffers
-        ssize_t length      = src->length() + ir->length();
+        ssize_t dry_length  = src->length();
+        ssize_t wet_length  = dry_length + ir->length(); // The length of wet (processed) signal
+        ssize_t length      = (latency > 0) ?
+                              lsp_max(wet_length, ssize_t(dry_length + latency)) :
+                              lsp_max(ssize_t(wet_length - latency), dry_length);
         if (!out.init(src->channels(), length, length))
             return STATUS_NO_MEM;
 
         // Allocate buffer for convolution tail
         uint8_t *ptr;
-        float *buf      = alloc_aligned<float>(ptr, ir->length());
+        float *buf          = alloc_aligned<float>(ptr, wet_length);
         if (buf == NULL)
             return STATUS_NO_MEM;
-        dsp::fill_zero(buf, ir->length());
 
+        // Perform signal processing
         for (size_t i=0, n=src->channels(); i<n; ++i)
         {
             // Initialize convolver
@@ -416,10 +422,22 @@ namespace timbremill
                 return STATUS_NO_MEM;
 
             // Perform convolution
-            float *dp = out.channel(i);
-            cv.process(dp, src->channel(i), src->length());     // The main convolution
-            dp += src->length();
-            cv.process(dp, buf, ir->length());                  // The convolution tail
+            dsp::fill_zero(buf, wet_length);
+            cv.process(buf, src->channel(i), dry_length);                   // The main convolution
+            cv.process(&buf[dry_length], &buf[dry_length], ir->length());   // The tail of convolution
+
+            // Apply dry (unprocessed signal)
+            float *dp       = out.channel(i);
+            if (latency > 0)
+                dsp::mul_k3(&dp[latency], src->channel(i), dry, dry_length);
+            else
+                dsp::mul_k3(dp, src->channel(i), dry, dry_length);
+
+            // Apply wet (processed) signal
+            if (latency > 0)
+                dsp::fmadd_k3(dp, buf, wet, wet_length);
+            else
+                dsp::fmadd_k3(&dp[-latency], buf, wet, wet_length);
         }
 
         // Save sample
