@@ -70,8 +70,10 @@ namespace timbremill
     config_t::config_t()
     {
         nSampleRate     = 48000;
-        nFftRank        = 12; // 4096 samples
+        nFftRank        = 12;       // 4096 samples
         fGainRange      = 48.0f;
+        fDry            = -1000.0f; // Dry amount
+        fWet            = 0.0f;     // Wet amount
         nProduce        = OUT_ALL;
 
         sFile.set_ascii("${master_name}/${file_name} - processed.wav");

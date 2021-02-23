@@ -378,6 +378,10 @@ namespace timbremill
                 res = parse_json_config_int(&cfg->nFftRank, p);
             else if (ev.sValue.equals_ascii("produce"))
                 res = parse_json_config_flags(&cfg->nProduce, produce_flags, p);
+            else if (ev.sValue.equals_ascii("dry"))
+                res = parse_json_config_float(&cfg->fDry, p);
+            else if (ev.sValue.equals_ascii("wet"))
+                res = parse_json_config_float(&cfg->fWet, p);
             else
                 res = p->skip_current();
 

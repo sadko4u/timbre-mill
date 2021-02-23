@@ -39,6 +39,8 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(cfg->nSampleRate == 88200);
         UTEST_ASSERT(cfg->nFftRank == 8);
         UTEST_ASSERT(cfg->nProduce == (timbremill::OUT_IR | timbremill::OUT_AUDIO));
+        UTEST_ASSERT(float_equals_absolute(cfg->fDry, -19.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fWet, -7.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/user/in"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/user/out"));
         UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("%{master_name}-${file_name} - IR.wav"));
@@ -87,6 +89,8 @@ UTEST_BEGIN("timbremill", cmdline)
             "-ifo", "51",
             "-sr",  "88200",
             "-s",   "/home/user/in",
+            "-dg",  "-19",
+            "-wg",  "-7",
             "-c",
             NULL
         };

@@ -103,6 +103,8 @@ namespace timbremill
             ssize_t                                 nFftRank;       // FFT rank
             ssize_t                                 nProduce;       // List of files to produce (flags)
             float                                   fGainRange;     // Gain range (in decibels)
+            float                                   fDry;           // Amount of dry signal
+            float                                   fWet;           // Amount of wet signal
             irfile_t                                sIR;            // IR file data
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
 

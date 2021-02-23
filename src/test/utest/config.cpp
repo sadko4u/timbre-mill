@@ -37,6 +37,8 @@ UTEST_BEGIN("timbremill", config)
         UTEST_ASSERT(cfg->nFftRank == 16);
         UTEST_ASSERT(cfg->nProduce == (timbremill::OUT_RAW | timbremill::OUT_AUDIO));
         UTEST_ASSERT(float_equals_absolute(cfg->fGainRange, 72.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fDry, -18.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fWet, -6.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/test"));
         UTEST_ASSERT(cfg->sDstPath.equals_ascii("/home/out"));
         UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("%{master_name}/test-${file_name} - IR.wav"));
