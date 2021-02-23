@@ -194,7 +194,6 @@ namespace timbremill
                     fprintf(stderr, "  error trimming impulse response, error code: %d\n", int(res));
                     return res;
                 }
-                printf("  trimmed IR latency (samples): %d\n", int(latency));
 
                 // Need to produce IR file?
                 if (cfg->nProduce & OUT_IR)
