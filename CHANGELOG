@@ -2,6 +2,8 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.4 ===
+
 === 0.5.3 ===
 * Added 'mastering' option to perform reverse-processing (applying frequency
   characteristics of master file to child files).
