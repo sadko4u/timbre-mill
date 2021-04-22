@@ -1,0 +1,38 @@
+{
+	"srate": 44100,
+	"dst_path": "tmp",
+	"src_path": "res/test/radio",
+	"file": "mastered/${file_name} - processed.wav",
+	"produce": [ "audio" ],
+	"fft_rank": 16,
+	"dry" : -1000,
+	"wet" : 0,
+	"mastering": true,
+	
+	"ir": {
+		"head_cut": 45,
+		"tail_cut": 5,
+		"fade_in": 2,
+		"fade_out": 50,
+		"file": "ir/${file_name} - IR.wav",
+		"raw": "ir/${file_name} - Raw IR.wav"
+	},
+
+	"groups": {
+		"advertisement": {
+			"master": "Джуманджи.wav",
+			"files": [
+				"Aster1.wav",
+				"Aster2.wav",
+				"rio-1.wav",
+				"ДА_Дача_Бульмени Горячая Штучка_Чехов_аудио_mixdown.wav",
+				"ДА_Дача_Сосиски Папа Может_Чехов_аудио_mixdown.wav",
+				"ДА_Масло сливочное Аисфер_Чехов_аудио_mixdown.wav",
+				"ДА_Напиток ПЕПСИ_Чехов_аудио_mixdown.wav",
+				"ДА_Сок J7_Чехов_аудио_mixdown.wav",
+				"ДА_Сырок творожный Светлогорье_Чехов_аудио_mixdown.wav",
+				"ДоброценТобольск.wav"
+			]
+		}
+	}
+}

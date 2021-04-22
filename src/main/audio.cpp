@@ -93,7 +93,7 @@ namespace timbremill
 
         duration_t d;
         calc_duration(&d, sample);
-        fprintf(stdout, "  loaded file: '%s', channels: %d, samples: %d,sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
+        fprintf(stdout, "  loaded file: '%s', channels: %d, samples: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
                 path.as_native(),
                 int(sample->channels()), int(sample->length()), int(sample->sample_rate()),
                 int(d.h), int(d.m), int(d.s), int(d.ms)

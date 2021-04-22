@@ -99,7 +99,7 @@ namespace timbremill
 
     status_t process_file_group(config_t *cfg, fgroup_t *fg)
     {
-        dspu::Sample master, mp;
+        dspu::Sample master, mp, *src, *dst;
         expr::Variables vars;
         status_t res;
         ssize_t fft_rank    = lsp_limit(cfg->nFftRank, FFT_MIN, FFT_MAX);
@@ -168,7 +168,10 @@ namespace timbremill
             }
 
             // Compute the impulse response of the file
-            if ((res = timbre_impulse_response(&raw_ir, &mp, &cp, fft_rank, cfg->fGainRange)) != STATUS_OK)
+            src = (cfg->bMastering) ? &mp : &cp;
+            dst = (cfg->bMastering) ? &cp : &mp;
+
+            if ((res = timbre_impulse_response(&raw_ir, dst, src, fft_rank, cfg->fGainRange)) != STATUS_OK)
             {
                 fprintf(stderr, "  error computing raw impulse response for the child file '%s'\n", fname->get_native());
                 return res;
@@ -207,8 +210,10 @@ namespace timbremill
                 // Need to produce audio file?
                 if (cfg->nProduce & OUT_AUDIO)
                 {
+                    dst     = (cfg->bMastering) ? &child : &master;
+
                     // Convolve the trimmed IR file with the master sample
-                    if ((res = convolve(&af, &master, &ir, latency, dry, wet)) != STATUS_OK)
+                    if ((res = convolve(&af, dst, &ir, latency, dry, wet)) != STATUS_OK)
                     {
                         fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
                         return res;
