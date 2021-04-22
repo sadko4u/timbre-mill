@@ -40,6 +40,14 @@ namespace timbremill
         OUT_ALL     = OUT_IR | OUT_RAW | OUT_AUDIO
     };
 
+    enum normalize_t
+    {
+        NORM_NONE,      // No normalization
+        NORM_ABOVE,     // When the maximum peak is above the threshold
+        NORM_BELOW,     // When the maximum peak is below the threshold
+        NORM_ALWAYS     // Always normalize
+    };
+
     typedef struct cfg_flag_t
     {
         const char     *name;
@@ -105,6 +113,10 @@ namespace timbremill
             float                                   fGainRange;     // Gain range (in decibels)
             float                                   fDry;           // Amount of dry signal
             float                                   fWet;           // Amount of wet signal
+            bool                                    bMastering;     // 'Mastering' feature
+            ssize_t                                 nNormalize;     // Normalization method
+            float                                   fNormGain;      // Normalization gain
+
             irfile_t                                sIR;            // IR file data
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
 
@@ -121,6 +133,7 @@ namespace timbremill
      * Flags for 'produce' option of the configuration
      */
     extern const cfg_flag_t     produce_flags[];
+    extern const cfg_flag_t     normalize_flags[];
 
     /**
      * Find flag by given name

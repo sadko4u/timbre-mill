@@ -27,6 +27,7 @@
 #include <lsp-plug.in/dsp-units/sampling/Sample.h>
 #include <lsp-plug.in/expr/Resolver.h>
 
+#include <private/config/data.h>
 #include <private/config/config.h>
 
 namespace timbremill
@@ -109,6 +110,15 @@ namespace timbremill
      * @return status of operation
      */
     status_t convolve(dspu::Sample *dst, const dspu::Sample *src, const dspu::Sample *ir, ssize_t latency, float dry, float wet);
+
+    /**
+     * Normalize sample to the specified gain
+     * @param dst sample to normalize
+     * @param gain the maximum peak gain
+     * @param mode the normalization mode
+     * @return status of operation
+     */
+    status_t normalize(dspu::Sample *dst, float gain, size_t mode);
 }
 
 

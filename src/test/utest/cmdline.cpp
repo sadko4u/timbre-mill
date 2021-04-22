@@ -49,7 +49,10 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 6.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 3.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 51.0f));
+        UTEST_ASSERT(cfg->bMastering == true);
         UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}-${file_name} - processed.wav"));
+        UTEST_ASSERT(float_equals_absolute(cfg->fNormGain, -12.0f));
+        UTEST_ASSERT(cfg->nNormalize == timbremill::NORM_ALWAYS);
 
         // Validate "group1"
         UTEST_ASSERT(key.set_ascii("group1"));
@@ -91,6 +94,9 @@ UTEST_BEGIN("timbremill", cmdline)
             "-s",   "/home/user/in",
             "-dg",  "-19",
             "-wg",  "-7",
+            "-m",   "true",
+            "-ng",  "-12",
+            "-n",   "ALWAYS",
             "-c",
             NULL
         };

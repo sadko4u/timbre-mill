@@ -93,7 +93,7 @@ namespace timbremill
 
         duration_t d;
         calc_duration(&d, sample);
-        fprintf(stdout, "  loaded file: '%s', channels: %d, samples: %d,sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
+        fprintf(stdout, "  loaded file: '%s', channels: %d, samples: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
                 path.as_native(),
                 int(sample->channels()), int(sample->length()), int(sample->sample_rate()),
                 int(d.h), int(d.m), int(d.s), int(d.ms)
@@ -442,6 +442,44 @@ namespace timbremill
 
         // Save sample
         dst->swap(&out);
+
+        return STATUS_OK;
+    }
+
+    status_t normalize(dspu::Sample *dst, float gain, size_t mode)
+    {
+        if (mode == NORM_NONE)
+            return STATUS_OK;
+
+        float peak  = 0.0f;
+        for (size_t i=0, n=dst->channels(); i<n; ++i)
+        {
+            float cpeak = dsp::abs_max(dst->channel(i), dst->length());
+            peak        = lsp_max(peak, cpeak);
+        }
+
+        // No peak detected?
+        if (peak < 1e-6)
+            return STATUS_OK;
+
+        switch (mode)
+        {
+            case NORM_BELOW:
+                if (peak >= gain)
+                    return STATUS_OK;
+                break;
+            case NORM_ABOVE:
+                if (peak <= gain)
+                    return STATUS_OK;
+                break;
+            default:
+                break;
+        }
+
+        // Adjust gain
+        float k = gain / peak;
+        for (size_t i=0, n=dst->channels(); i<n; ++i)
+            dsp::mul_k2(dst->channel(i), k, dst->length());
 
         return STATUS_OK;
     }
