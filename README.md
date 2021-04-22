@@ -12,6 +12,10 @@ which allow to tune tonal characteristics of the master file to match
 the tonal characteristics of each corresponding child file. These raw IR files
 allow to process audio data as linear-phase finite impulse response filters (FIRs).
 
+There is additional 'mastering' mode provided that allows to swap roles between master and
+child files so the timbral correction becomes applied to child files respective to the
+computed spectral difference of master to the child.
+
 Since linear-phased filters are symmetric across the center of the impulse response,
 the processed audio data will introduce latency of the half of the impulse response duration.
 To reduce the latency effect, additional option is available to cut (or strip) the raw
@@ -35,6 +39,9 @@ The example of batch file is the following:
 	"produce": [ "ir", "audio" ],
 	"dry" : -12,
 	"wet" : 0,
+	"mastering" : false,
+	"normalize": "above",
+	"norm_gain": -6,
 	
 	"ir": {
 		"head_cut": 45,
@@ -83,6 +90,13 @@ Here's the full description of all possible parameters which can be omitted in t
     * **fade_out** - the amount of linear fade-in (in percent) to add at the end of the IR file;
     * **file** - the name of the stripped impulse response file, by default "${master_name}/${file_name} - IR.wav";
     * **raw** - the name of the raw impulse response file, by default "${master_name}/${file_name} - Raw IR.wav";
+  * **masetering** - enables the tool working in reverse mode (applying timbral correction from master to child files);
+  * **norm_gain** - the peak normalization gain (in decibels) at output;
+  * **normalize** - the output file normaliztion:
+    * **none** - do not use normalization (default);
+    * **above** - normalize the file if the maximum signal peak is above the **norm_gain** level;
+    * **below** - normalize the file if the maximum signal peak is below the **norm_gain** level;
+    * **always** - always normalize output files to match the maximum signal peak to **norm_gain** level;
   * **produce** - the array of strings that indicates the list of files to produce, ```[ "all" ]``` by default:
     * **all** - produce all types of files: IR, raw IR, processed audio;
     * **audio** - produce processed audio file;
@@ -113,17 +127,21 @@ The tool allows to override some batch parameters by specifying them as command-
   -dg, --dry             The amount (in dB) of unprocessed signal in output file
   -f, --file             Format of the output file name
   -fr, --fft-rank        The FFT rank (resolution) used for profiling
-  -h, --help             Output help message
+  -h, --help             Output this help message
   -ir, --ir-file         Format of the processed impulse response file name
   -iw, --ir-raw          Format of the raw impulse response file name
   -ifi, --ir-fade-in     The amount (in %) of fade-in for the IR file
   -ifo, --ir-fade-out    The amount (in %) of fade-out for the IR file
   -ihc, --ir-head-cut    The amount (in %) of head cut for the IR file
   -itc, --ir-tail-cut    The amount (in %) of tail cut for the IR file
+  -m, --mastering        Work as auto-mastering tool instead of timbral correction
+  -n, --normalize        Set normalization mode
+  -ng, --norm-gain       Set normalization peak gain (in dB)
   -p, --produce          Comma-separated list of produced output files (ir,raw,audio,all)
   -s, --src-path         Source path to take files from
   -sr, --srate           Sample rate of output files
   -wg, --wet             The amount (in dB) of processed signal in output file
+
 ```
 
 Requirements
