@@ -34,6 +34,14 @@ namespace timbremill
         { NULL,     0           }
     };
 
+    const cfg_flag_t normalize_flags[] =
+    {
+        { "none",   NORM_NONE   },
+        { "above",  NORM_ABOVE  },
+        { "below",  NORM_BELOW  },
+        { "always", NORM_ALWAYS },
+        { NULL,     0           }
+    };
 
     fgroup_t::fgroup_t()
     {
@@ -70,12 +78,14 @@ namespace timbremill
     config_t::config_t()
     {
         nSampleRate     = 48000;
-        nFftRank        = 12;       // 4096 samples
+        nFftRank        = 12;           // 4096 samples
         fGainRange      = 48.0f;
-        fDry            = -1000.0f; // Dry amount
-        fWet            = 0.0f;     // Wet amount
+        fDry            = -1000.0f;     // Dry amount
+        fWet            = 0.0f;         // Wet amount
         nProduce        = OUT_ALL;
-        bMastering      = false;    // Work as timbre-correction tool by default
+        bMastering      = false;        // Work as timbre-correction tool by default
+        nNormalize      = NORM_NONE;    // No normalization by default
+        fNormGain       = 0.0f;         // 0 dB gain by default
 
         sFile.set_ascii("${master_name}/${file_name} - processed.wav");
     }

@@ -7,6 +7,8 @@
 	"dry": -18,
 	"wet": -6,
 	"mastering": true,
+	"normalize": "above",
+	"norm_gain": -10,
 	
 	"produce": [ "raw", "audio" ],
 	

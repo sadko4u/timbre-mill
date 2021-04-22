@@ -5,6 +5,7 @@
 === 0.5.3 ===
 - Added 'mastering' option to perform reverse-processing (applying frequency
   characteristics of master file to child files).
+- Added 'normalize' and 'norm_gain' parameters for peak gain normalization.
 
 === 0.5.2 ===
 * Added 'dry' and 'wet' parameters for setting up balance between processed
