@@ -59,7 +59,7 @@ clean:
 fetch:
 	@$(CHK_CONFIG)
 	@echo "Fetching desired source code dependencies"
-	@$(MAKE) -s -f "$(BASEDIR)/make/modules.mk" $(@) BASEDIR="$(BASEDIR)" CONFIG="$(CONFIG)" MODULES="$(MODULES)"
+	@$(MAKE) -s -f "$(BASEDIR)/make/modules.mk" $(@) BASEDIR="$(BASEDIR)" CONFIG="$(CONFIG)"
 	@echo "Fetch OK"
 	
 tree:
@@ -89,7 +89,7 @@ config:
 distsrc:
 	@echo "Building source code archive"
 	@mkdir -p "$(DISTSRC)/modules"
-	@$(MAKE) -s -f "$(BASEDIR)/make/modules.mk" tree BASEDIR="$(BASEDIR)" MODDIR="$(DISTSRC)/modules" TREE="1"
+	@$(MAKE) -s -f "$(BASEDIR)/make/modules.mk" tree BASEDIR="$(BASEDIR)" MODULES="$(DISTSRC)/modules" TREE="1"
 	@cp -R $(BASEDIR)/include $(BASEDIR)/make $(BASEDIR)/src "$(DISTSRC)/"
 	@cp $(BASEDIR)/CHANGELOG $(BASEDIR)/COPYING* $(BASEDIR)/Makefile $(BASEDIR)/*.mk "$(DISTSRC)/"
 	@find "$(DISTSRC)" -iname '.git' | xargs -exec rm -rf {}
