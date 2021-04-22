@@ -6,6 +6,7 @@
 	"fft_rank": 16,
 	"dry": -18,
 	"wet": -6,
+	"mastering": true,
 	
 	"produce": [ "raw", "audio" ],
 	

@@ -80,6 +80,27 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t parse_json_config_bool(bool *dst, json::Parser *p)
+    {
+        json::event_t ev;
+
+        // Should be JSON object
+        status_t res = p->read_next(&ev);
+        if (res != STATUS_OK)
+            return res;
+        else if (ev.type == json::JE_INTEGER)
+            *dst    = ev.iValue;
+        else if (ev.type == json::JE_DOUBLE)
+            *dst    = ev.fValue > 0.5f;
+        else if (ev.type == json::JE_BOOL)
+            *dst    = ev.bValue;
+        else
+            return STATUS_BAD_TYPE;
+
+        // Return OK status
+        return STATUS_OK;
+    }
+
     status_t parse_json_config_flags(ssize_t *dst, const cfg_flag_t *flags, json::Parser *p)
     {
         json::event_t ev;
@@ -382,6 +403,8 @@ namespace timbremill
                 res = parse_json_config_float(&cfg->fDry, p);
             else if (ev.sValue.equals_ascii("wet"))
                 res = parse_json_config_float(&cfg->fWet, p);
+            else if (ev.sValue.equals_ascii("mastering"))
+                res = parse_json_config_bool(&cfg->bMastering, p);
             else
                 res = p->skip_current();
 

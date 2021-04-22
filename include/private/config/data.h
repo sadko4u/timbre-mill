@@ -105,6 +105,8 @@ namespace timbremill
             float                                   fGainRange;     // Gain range (in decibels)
             float                                   fDry;           // Amount of dry signal
             float                                   fWet;           // Amount of wet signal
+            bool                                    bMastering;     // 'Mastering' feature
+
             irfile_t                                sIR;            // IR file data
             lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
 

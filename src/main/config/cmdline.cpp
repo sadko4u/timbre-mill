@@ -45,6 +45,7 @@ namespace timbremill
         "-ifo", "--ir-fade-out",    "The amount (in %) of fade-out for the IR file",
         "-ihc", "--ir-head-cut",    "The amount (in %) of head cut for the IR file",
         "-itc", "--ir-tail-cut",    "The amount (in %) of tail cut for the IR file",
+        "-m",   "--mastering",      "Work as auto-mastering tool instead of timbral correction",
         "-p",   "--produce",        "Comma-separated list of produced output files (ir,raw,audio,all)",
         "-s",   "--src-path",       "Source path to take files from",
         "-sr",  "--srate",          "Sample rate of output files",
@@ -193,6 +194,41 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t parse_cmdline_bool(bool *dst, const char *val, const char *parameter)
+    {
+        LSPString in;
+        if (!in.set_native(val))
+        {
+            fprintf(stderr, "Out of memory\n");
+            return STATUS_NO_MEM;
+        }
+
+        io::InStringSequence is(&in);
+        expr::Tokenizer t(&is);
+        bool bvalue;
+
+        switch (t.get_token(expr::TF_GET))
+        {
+            case expr::TT_IVALUE: bvalue = t.int_value(); break;
+            case expr::TT_FVALUE: bvalue = t.float_value() >= 0.5f; break;
+            case expr::TT_TRUE: bvalue = true; break;
+            case expr::TT_FALSE: bvalue = false; break;
+            default:
+                fprintf(stderr, "Bad '%s' value\n", parameter);
+                return STATUS_INVALID_VALUE;
+        }
+
+        if (t.get_token(expr::TF_GET) != expr::TT_EOF)
+        {
+            fprintf(stderr, "Bad '%s' value\n", parameter);
+            return STATUS_INVALID_VALUE;
+        }
+
+        *dst = bvalue;
+
+        return STATUS_OK;
+    }
+
     status_t parse_cmdline(config_t *cfg, int argc, const char **argv)
     {
         const char *cmd = argv[0], *val;
@@ -335,6 +371,11 @@ namespace timbremill
         if ((val = options.get("--wet")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->fWet, val, "wet")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--mastering")) != NULL)
+        {
+            if ((res = parse_cmdline_bool(&cfg->bMastering, val, "mastering")) != STATUS_OK)
                 return res;
         }
 

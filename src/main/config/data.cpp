@@ -75,6 +75,7 @@ namespace timbremill
         fDry            = -1000.0f; // Dry amount
         fWet            = 0.0f;     // Wet amount
         nProduce        = OUT_ALL;
+        bMastering      = false;    // Work as timbre-correction tool by default
 
         sFile.set_ascii("${master_name}/${file_name} - processed.wav");
     }

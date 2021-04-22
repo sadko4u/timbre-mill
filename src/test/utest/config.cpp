@@ -47,6 +47,7 @@ UTEST_BEGIN("timbremill", config)
         UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 5.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 2.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 50.0f));
+        UTEST_ASSERT(cfg->bMastering == true);
         UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}/test-${file_name} - processed.wav"));
 
         // Validate "group1"
