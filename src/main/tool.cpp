@@ -105,6 +105,7 @@ namespace timbremill
         ssize_t fft_rank    = lsp_limit(cfg->nFftRank, FFT_MIN, FFT_MAX);
         float dry           = drywet_to_gain(cfg->fDry);
         float wet           = drywet_to_gain(cfg->fWet);
+        float ngain         = dspu::db_to_gain(cfg->fNormGain);
 
         // Analyze group settings
         if (fg->sMaster.is_empty())
@@ -216,6 +217,13 @@ namespace timbremill
                     if ((res = convolve(&af, dst, &ir, latency, dry, wet)) != STATUS_OK)
                     {
                         fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
+                        return res;
+                    }
+
+                    // Normalize if required
+                    if ((res = normalize(&af, ngain, cfg->nNormalize)) != STATUS_OK)
+                    {
+                        fprintf(stderr, "  error normalizing output audio file, error code: %d\n", int(res));
                         return res;
                     }
 

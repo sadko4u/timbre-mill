@@ -4,10 +4,12 @@
 	"src_path": "res/test/radio",
 	"file": "mastered/${file_name} - processed.wav",
 	"produce": [ "audio" ],
-	"fft_rank": 16,
+	"fft_rank": 14,
 	"dry" : -1000,
 	"wet" : 0,
 	"mastering": true,
+	"normalize": "always",
+	"norm_gain": -6,
 	
 	"ir": {
 		"head_cut": 45,
@@ -31,7 +33,8 @@
 				"ДА_Напиток ПЕПСИ_Чехов_аудио_mixdown.wav",
 				"ДА_Сок J7_Чехов_аудио_mixdown.wav",
 				"ДА_Сырок творожный Светлогорье_Чехов_аудио_mixdown.wav",
-				"ДоброценТобольск.wav"
+				"ДоброценТобольск.wav",
+				"Джуманджи.wav"
 			]
 		}
 	}
