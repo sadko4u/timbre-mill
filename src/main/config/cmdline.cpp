@@ -380,13 +380,70 @@ namespace timbremill
             return STATUS_BAD_ARGUMENTS;
         }
 
+        // Do we have master section?
+        if (master != NULL)
+        {
+            // Get group name
+            LSPString grp;
+            const char *group = options.get("--group");
+            if (!grp.set_native((group != NULL) ? group : "default"))
+            {
+                fprintf(stderr, "Not enough memory\n");
+                return STATUS_NO_MEM;
+            }
+
+            // Add group if not exists
+            fgroup_t *fgrp = cfg->vGroups.get(&grp);
+            if (fgrp == NULL)
+            {
+                fgrp        = new fgroup_t();
+                fgrp->sName.set(&grp);
+                if (!cfg->vGroups.create(&grp, fgrp))
+                {
+                    delete fgrp;
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+            }
+
+            // Configure group
+            fgrp->sMaster.set_native(master);
+            for (size_t i=0, n=children.size(); i<n; ++i)
+            {
+                LSPString *fname = new LSPString();
+                if (fname == NULL)
+                {
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+                fname->set_native(children.uget(i));
+                if (!fgrp->vFiles.add(fname))
+                {
+                    delete fname;
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+            }
+
+            // Override produce as OUT_AUDIO
+            cfg->nProduce   = OUT_AUDIO;
+        }
+
         // Override configuration file parameters
         if ((val = options.get("--file")) != NULL)
             cfg->sFile.set_native(val);
         if ((val = options.get("--ir-file")) != NULL)
+        {
             cfg->sIR.sFile.set_native(val);
+            if (master)
+                cfg->nProduce      |= OUT_IR;
+        }
         if ((val = options.get("--ir-raw")) != NULL)
+        {
             cfg->sIR.sRaw.set_native(val);
+            if (master)
+                cfg->nProduce      |= OUT_RAW;
+        }
         if ((val = options.get("--ir-fade-in")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->sIR.fFadeIn, val, "IR fade in")) != STATUS_OK)
@@ -426,11 +483,6 @@ namespace timbremill
             if ((res = parse_cmdline_float(&cfg->fGainRange, val, "gain range")) != STATUS_OK)
                 return res;
         }
-        if ((val = options.get("--produce")) != NULL)
-        {
-            if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
-                return res;
-        }
         if ((val = options.get("--dry")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->fDry, val, "dry")) != STATUS_OK)
@@ -456,50 +508,10 @@ namespace timbremill
             if ((res = parse_cmdline_enum(&cfg->nNormalize, "normalize", val, normalize_flags)) != STATUS_OK)
                 return res;
         }
-
-        // Do we have master section?
-        if (master != NULL)
+        if ((val = options.get("--produce")) != NULL)
         {
-            // Get group name
-            LSPString grp;
-            const char *group = options.get("--group");
-            if (!grp.set_native((group != NULL) ? group : "default"))
-            {
-                fprintf(stderr, "Not enough memory\n");
-                return STATUS_NO_MEM;
-            }
-
-            // Add group if not exists
-            fgroup_t *fgrp = cfg->vGroups.get(&grp);
-            if (fgrp == NULL)
-            {
-                fgrp    = new fgroup_t();
-                if (!cfg->vGroups.create(&grp, fgrp))
-                {
-                    delete fgrp;
-                    fprintf(stderr, "Not enough memory\n");
-                    return STATUS_NO_MEM;
-                }
-            }
-
-            // Configure group
-            fgrp->sMaster.set_native(master);
-            for (size_t i=0, n=children.size(); i<n; ++i)
-            {
-                LSPString *fname = new LSPString();
-                if (fname == NULL)
-                {
-                    fprintf(stderr, "Not enough memory\n");
-                    return STATUS_NO_MEM;
-                }
-                fname->set_native(children.uget(i));
-                if (!fgrp->vFiles.add(fname))
-                {
-                    delete fname;
-                    fprintf(stderr, "Not enough memory\n");
-                    return STATUS_NO_MEM;
-                }
-            }
+            if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
+                return res;
         }
 
         return STATUS_OK;

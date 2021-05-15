@@ -59,6 +59,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);
         {
             UTEST_ASSERT(g->sMaster.equals_ascii("file1.wav"));
+            UTEST_ASSERT(g->sName.equals_ascii("group1"));
             UTEST_ASSERT(g->vFiles.size() == 3);
             UTEST_ASSERT(g->vFiles.get(0)->equals_ascii("out-file1.wav"));
             UTEST_ASSERT(g->vFiles.get(1)->equals_ascii("out-file2.wav"));
@@ -70,6 +71,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);
         {
             UTEST_ASSERT(g->sMaster.equals_ascii("a.wav"));
+            UTEST_ASSERT(g->sName.equals_ascii("group2"));
             UTEST_ASSERT(g->vFiles.size() == 2);
             UTEST_ASSERT(g->vFiles.get(0)->equals_ascii("a-out.wav"));
             UTEST_ASSERT(g->vFiles.get(1)->equals_ascii("b-out.wav"));
@@ -149,7 +151,7 @@ UTEST_BEGIN("timbremill", cmdline)
         // Validate root parameters
         UTEST_ASSERT(cfg->nSampleRate == 48000);
         UTEST_ASSERT(cfg->nFftRank == 12);
-        UTEST_ASSERT(cfg->nProduce == timbremill::OUT_ALL);
+        UTEST_ASSERT(cfg->nProduce == timbremill::OUT_AUDIO);
         UTEST_ASSERT(float_equals_absolute(cfg->fDry, -1000.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->fWet, 0.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii(""));
@@ -170,6 +172,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);
         {
             UTEST_ASSERT(g->sMaster.equals_ascii("master-file.wav"));
+            UTEST_ASSERT(g->sName.equals_ascii("test-group"));
             UTEST_ASSERT(g->vFiles.size() == 2);
             UTEST_ASSERT(g->vFiles.get(0)->equals_ascii("child-file1.wav"));
             UTEST_ASSERT(g->vFiles.get(1)->equals_ascii("child-file2.wav"));
