@@ -122,11 +122,13 @@ Each name of the output file can be parametrized with the following predefined v
 The tool allows to override some batch parameters by specifying them as command-line arguments. The full list can be obtained by issuing ```timbre-mill --help``` command and is the following:
 
 ```
-  -c, --config           Configuration file name (required)
+  -c, --config           Configuration file name (required if no -mf option is set)
+  -cf, --child           The name of the child file (multiple options allowed)
   -d, --dst-path         Destination path to store audio files
   -dg, --dry             The amount (in dB) of unprocessed signal in output file
   -f, --file             Format of the output file name
   -fr, --fft-rank        The FFT rank (resolution) used for profiling
+  -g, --group            The group name for -cf (--child) option, "default" if not set
   -h, --help             Output this help message
   -ir, --ir-file         Format of the processed impulse response file name
   -iw, --ir-raw          Format of the raw impulse response file name
@@ -135,6 +137,7 @@ The tool allows to override some batch parameters by specifying them as command-
   -ihc, --ir-head-cut    The amount (in %) of head cut for the IR file
   -itc, --ir-tail-cut    The amount (in %) of tail cut for the IR file
   -m, --mastering        Work as auto-mastering tool instead of timbral correction
+  -mf, --master          The name of the master file
   -n, --normalize        Set normalization mode
   -ng, --norm-gain       Set normalization peak gain (in dB)
   -p, --produce          Comma-separated list of produced output files (ir,raw,audio,all)
@@ -143,6 +146,11 @@ The tool allows to override some batch parameters by specifying them as command-
   -wg, --wet             The amount (in dB) of processed signal in output file
 
 ```
+
+If the option ```-mf``` is specified, the default value of ```-p``` option is reset to ```audio```. Additionally:
+* Specifying the ```-ir``` option automatically adds the ```ir``` item to the ```-p``` option.
+* The same behaviour is also true for ```-iw``` option which automatically adds the ```raw``` item to the ```-p``` option.
+* Explicitly specified ```-p``` option won't be overridden by the ```-mf```, ```-ir``` and ```-iw``` options.
 
 Requirements
 ======

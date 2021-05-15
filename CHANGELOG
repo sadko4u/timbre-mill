@@ -2,6 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.4 ===
+* Added possibility to explicitly specify files for processing in the command line
+  arguments and avoid the usage of the configuration file.
+
 === 0.5.3 ===
 * Added 'mastering' option to perform reverse-processing (applying frequency
   characteristics of master file to child files).

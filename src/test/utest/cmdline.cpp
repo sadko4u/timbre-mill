@@ -59,6 +59,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);
         {
             UTEST_ASSERT(g->sMaster.equals_ascii("file1.wav"));
+            UTEST_ASSERT(g->sName.equals_ascii("group1"));
             UTEST_ASSERT(g->vFiles.size() == 3);
             UTEST_ASSERT(g->vFiles.get(0)->equals_ascii("out-file1.wav"));
             UTEST_ASSERT(g->vFiles.get(1)->equals_ascii("out-file2.wav"));
@@ -70,6 +71,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);
         {
             UTEST_ASSERT(g->sMaster.equals_ascii("a.wav"));
+            UTEST_ASSERT(g->sName.equals_ascii("group2"));
             UTEST_ASSERT(g->vFiles.size() == 2);
             UTEST_ASSERT(g->vFiles.get(0)->equals_ascii("a-out.wav"));
             UTEST_ASSERT(g->vFiles.get(1)->equals_ascii("b-out.wav"));
@@ -116,14 +118,82 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(res == STATUS_OK);
     }
 
+    void parse_alt_cmdline(timbremill::config_t *cfg)
+    {
+        static const char *ext_argv[] =
+        {
+            "-g",   "test-group",
+            "-mf",  "master-file.wav",
+            "-cf",  "child-file1.wav",
+            "-cf",  "child-file2.wav",
+            "-f",   "out-file.wav",
+            NULL
+        };
+
+        lltl::parray<char> argv;
+        UTEST_ASSERT(argv.add(const_cast<char *>(full_name())));
+        for (const char **pv = ext_argv; *pv != NULL; ++pv)
+        {
+            UTEST_ASSERT(argv.add(const_cast<char *>(*pv)));
+        }
+
+        status_t res = timbremill::parse_cmdline(cfg, argv.size(), const_cast<const char **>(argv.array()));
+        UTEST_ASSERT(res == STATUS_OK);
+    }
+
+    void validate_alt_config(timbremill::config_t *cfg)
+    {
+        LSPString key;
+        timbremill::fgroup_t *g;
+
+        UTEST_ASSERT(cfg->vGroups.size() == 1);
+
+        // Validate root parameters
+        UTEST_ASSERT(cfg->nSampleRate == 48000);
+        UTEST_ASSERT(cfg->nFftRank == 12);
+        UTEST_ASSERT(cfg->nProduce == timbremill::OUT_AUDIO);
+        UTEST_ASSERT(float_equals_absolute(cfg->fDry, -1000.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->fWet, 0.0f));
+        UTEST_ASSERT(cfg->sSrcPath.equals_ascii(""));
+        UTEST_ASSERT(cfg->sDstPath.equals_ascii(""));
+        UTEST_ASSERT(cfg->sIR.sFile.equals_ascii("${master_name}/${file_name} - IR.wav"));
+        UTEST_ASSERT(cfg->sIR.sRaw.equals_ascii("${master_name}/${file_name} - Raw IR.wav"));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fHeadCut, 0.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fTailCut, 0.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeIn, 0.0f));
+        UTEST_ASSERT(float_equals_absolute(cfg->sIR.fFadeOut, 0.0f));
+        UTEST_ASSERT(cfg->bMastering == false);
+        UTEST_ASSERT(cfg->sFile.equals_ascii("out-file.wav"));
+        UTEST_ASSERT(float_equals_absolute(cfg->fNormGain, 0.0f));
+        UTEST_ASSERT(cfg->nNormalize == timbremill::NORM_NONE);
+
+        // Validate "test-group"
+        UTEST_ASSERT(key.set_ascii("test-group"));
+        UTEST_ASSERT((g = cfg->vGroups.get(&key)) != NULL);
+        {
+            UTEST_ASSERT(g->sMaster.equals_ascii("master-file.wav"));
+            UTEST_ASSERT(g->sName.equals_ascii("test-group"));
+            UTEST_ASSERT(g->vFiles.size() == 2);
+            UTEST_ASSERT(g->vFiles.get(0)->equals_ascii("child-file1.wav"));
+            UTEST_ASSERT(g->vFiles.get(1)->equals_ascii("child-file2.wav"));
+        }
+    }
+
     UTEST_MAIN
     {
         // Parse configuration from file and cmdline
-        timbremill::config_t cfg;
-        parse_cmdline(&cfg);
+        {
+            timbremill::config_t cfg;
+            parse_cmdline(&cfg);
+            validate_config(&cfg);
+        }
 
-        // Validate the final configuration
-        validate_config(&cfg);
+        // Parse alternative configuration cmdline
+        {
+            timbremill::config_t cfg;
+            parse_alt_cmdline(&cfg);
+            validate_alt_config(&cfg);
+        }
     }
 
 UTEST_END

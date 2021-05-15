@@ -33,11 +33,13 @@ namespace timbremill
 {
     static const char *options[] =
     {
-        "-c",   "--config",         "Configuration file name (required)",
+        "-c",   "--config",         "Configuration file name (required if no -mf option is set)",
+        "-cf",  "--child",          "The name of the child file (multiple options allowed)",
         "-d",   "--dst-path",       "Destination path to store audio files",
         "-dg",  "--dry",            "The amount (in dB) of unprocessed signal in output file",
         "-f",   "--file",           "Format of the output file name",
         "-fr",  "--fft-rank",       "The FFT rank (resolution) used for profiling",
+        "-g",   "--group",          "The group name for -cf (--child) option, \"default\" if not set",
         "-h",   "--help",           "Output this help message",
         "-ir",  "--ir-file",        "Format of the processed impulse response file name",
         "-iw",  "--ir-raw",         "Format of the raw impulse response file name",
@@ -46,6 +48,7 @@ namespace timbremill
         "-ihc", "--ir-head-cut",    "The amount (in %) of head cut for the IR file",
         "-itc", "--ir-tail-cut",    "The amount (in %) of tail cut for the IR file",
         "-m",   "--mastering",      "Work as auto-mastering tool instead of timbral correction",
+        "-mf",  "--master",         "The name of the master file",
         "-n",   "--normalize",      "Set normalization mode",
         "-ng",  "--norm-gain",      "Set normalization peak gain (in dB)",
         "-p",   "--produce",        "Comma-separated list of produced output files (ir,raw,audio,all)",
@@ -274,6 +277,8 @@ namespace timbremill
     {
         const char *cmd = argv[0], *val;
         lltl::pphash<char, char> options;
+        lltl::parray<char> children;
+        status_t res;
 
         // Read options to hash
         for (int i=1; i < argc; )
@@ -302,33 +307,53 @@ namespace timbremill
 
             // Parse options
             bool found = false;
-            for (const char **p = timbremill::options; *p != NULL; p += 3)
-                if (!strcmp(xopt, p[1]))
+            if ((!strcmp(xopt, "-cf")) || (!strcmp(xopt, "--child")))
+            {
+                val = argv[i++];
+                if (i >= argc)
                 {
-                    if (i >= argc)
-                    {
-                        fprintf(stderr, "Not defined value for option: %s\n", opt);
-                        return STATUS_BAD_ARGUMENTS;
-                    }
-
-                    // Add option to settings map
-                    val = argv[i++];
-                    if (options.exists(xopt))
-                    {
-                        fprintf(stderr, "Duplicate option: %s\n", opt);
-                        return STATUS_BAD_ARGUMENTS;
-                    }
-
-                    // Try to create option
-                    if (!options.create(xopt, const_cast<char *>(val)))
-                    {
-                        fprintf(stderr, "Not enough memory\n");
-                        return STATUS_NO_MEM;
-                    }
-
-                    found       = true;
-                    break;
+                    fprintf(stderr, "Not defined value for option: %s\n", xopt);
+                    return STATUS_BAD_ARGUMENTS;
                 }
+
+                // Add child file to list of children
+                if (!children.add(const_cast<char *>(val)))
+                {
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+                found       = true;
+            }
+            else
+            {
+                for (const char **p = timbremill::options; *p != NULL; p += 3)
+                    if (!strcmp(xopt, p[1]))
+                    {
+                        if (i >= argc)
+                        {
+                            fprintf(stderr, "Not defined value for option: %s\n", opt);
+                            return STATUS_BAD_ARGUMENTS;
+                        }
+
+                        // Add option to settings map
+                        val = argv[i++];
+                        if (options.exists(xopt))
+                        {
+                            fprintf(stderr, "Duplicate option: %s\n", opt);
+                            return STATUS_BAD_ARGUMENTS;
+                        }
+
+                        // Try to create option
+                        if (!options.create(xopt, const_cast<char *>(val)))
+                        {
+                            fprintf(stderr, "Not enough memory\n");
+                            return STATUS_NO_MEM;
+                        }
+
+                        found       = true;
+                        break;
+                    }
+            }
 
             if (!found)
             {
@@ -338,28 +363,87 @@ namespace timbremill
         }
 
         // Now we are ready to read config file
-        const char *cfg_name = options.get("--config");
-        if (cfg_name == NULL)
+        const char *master      = options.get("--master");
+        const char *cfg_name    = options.get("--config");
+        if (cfg_name != NULL)
+        {
+            // Try to parse configuration file
+            if ((res = parse_config(cfg, cfg_name)) != STATUS_OK)
+            {
+                fprintf(stderr, "Error parsing configuration file: code=%d\n", int(res));
+                return res;
+            }
+        }
+        else if (!master)
         {
             fprintf(stderr, "Not defined configuration file name\n");
             return STATUS_BAD_ARGUMENTS;
         }
 
-        // Try to parse configuration file
-        status_t res = parse_config(cfg, cfg_name);
-        if (res != STATUS_OK)
+        // Do we have master section?
+        if (master != NULL)
         {
-            fprintf(stderr, "Error parsing configuration file: code=%d\n", int(res));
-            return res;
+            // Get group name
+            LSPString grp;
+            const char *group = options.get("--group");
+            if (!grp.set_native((group != NULL) ? group : "default"))
+            {
+                fprintf(stderr, "Not enough memory\n");
+                return STATUS_NO_MEM;
+            }
+
+            // Add group if not exists
+            fgroup_t *fgrp = cfg->vGroups.get(&grp);
+            if (fgrp == NULL)
+            {
+                fgrp        = new fgroup_t();
+                fgrp->sName.set(&grp);
+                if (!cfg->vGroups.create(&grp, fgrp))
+                {
+                    delete fgrp;
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+            }
+
+            // Configure group
+            fgrp->sMaster.set_native(master);
+            for (size_t i=0, n=children.size(); i<n; ++i)
+            {
+                LSPString *fname = new LSPString();
+                if (fname == NULL)
+                {
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+                fname->set_native(children.uget(i));
+                if (!fgrp->vFiles.add(fname))
+                {
+                    delete fname;
+                    fprintf(stderr, "Not enough memory\n");
+                    return STATUS_NO_MEM;
+                }
+            }
+
+            // Override produce as OUT_AUDIO
+            cfg->nProduce   = OUT_AUDIO;
         }
 
         // Override configuration file parameters
         if ((val = options.get("--file")) != NULL)
             cfg->sFile.set_native(val);
         if ((val = options.get("--ir-file")) != NULL)
+        {
             cfg->sIR.sFile.set_native(val);
+            if (master)
+                cfg->nProduce      |= OUT_IR;
+        }
         if ((val = options.get("--ir-raw")) != NULL)
+        {
             cfg->sIR.sRaw.set_native(val);
+            if (master)
+                cfg->nProduce      |= OUT_RAW;
+        }
         if ((val = options.get("--ir-fade-in")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->sIR.fFadeIn, val, "IR fade in")) != STATUS_OK)
@@ -399,11 +483,6 @@ namespace timbremill
             if ((res = parse_cmdline_float(&cfg->fGainRange, val, "gain range")) != STATUS_OK)
                 return res;
         }
-        if ((val = options.get("--produce")) != NULL)
-        {
-            if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
-                return res;
-        }
         if ((val = options.get("--dry")) != NULL)
         {
             if ((res = parse_cmdline_float(&cfg->fDry, val, "dry")) != STATUS_OK)
@@ -427,6 +506,11 @@ namespace timbremill
         if ((val = options.get("--normalize")) != NULL)
         {
             if ((res = parse_cmdline_enum(&cfg->nNormalize, "normalize", val, normalize_flags)) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--produce")) != NULL)
+        {
+            if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
                 return res;
         }
 
