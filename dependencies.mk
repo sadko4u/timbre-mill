@@ -29,7 +29,7 @@ LSP_DSP_LIB_NAME           := lsp-dsp-lib
 LSP_DSP_LIB_TYPE           := src
 LSP_DSP_LIB_URL            := https://github.com/sadko4u/$(LSP_DSP_LIB_NAME).git
 
-LSP_DSP_UNITS_VERSION      := 0.5.2
+LSP_DSP_UNITS_VERSION      := 0.5.3
 LSP_DSP_UNITS_NAME         := lsp-dsp-units
 LSP_DSP_UNITS_TYPE         := src
 LSP_DSP_UNITS_URL          := https://github.com/sadko4u/$(LSP_DSP_UNITS_NAME).git

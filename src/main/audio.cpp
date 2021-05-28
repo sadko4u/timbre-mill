@@ -419,7 +419,10 @@ namespace timbremill
         {
             // Initialize convolver
             if (!cv.init(ir->channel(i), ir->length(), 16, 0))
+            {
+                free_aligned(buf);
                 return STATUS_NO_MEM;
+            }
 
             // Perform convolution
             dsp::fill_zero(buf, wet_length);
@@ -442,6 +445,7 @@ namespace timbremill
 
         // Save sample
         dst->swap(&out);
+        free_aligned(buf);
 
         return STATUS_OK;
     }
