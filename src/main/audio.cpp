@@ -288,10 +288,9 @@ namespace timbremill
     }
 
     status_t timbre_impulse_response(
-            dspu::Sample *dst,
-            const dspu::Sample *master, const dspu::Sample *child,
-            size_t precision, float db_range
-    )
+        dspu::Sample *dst,
+        const dspu::Sample *master, const dspu::Sample *child,
+        size_t precision, float db_range)
     {
         dspu::Sample out;
         status_t res;
@@ -352,11 +351,10 @@ namespace timbremill
     }
 
     status_t trim_impulse_response(
-            dspu::Sample *dst,
-            ssize_t *latency,
-            const dspu::Sample *src,
-            const irfile_t *params
-    )
+        dspu::Sample *dst,
+        ssize_t *latency,
+        const dspu::Sample *src,
+        const irfile_t *params)
     {
         dspu::Sample out;
 
@@ -486,6 +484,20 @@ namespace timbremill
             dsp::mul_k2(dst->channel(i), k, dst->length());
 
         return STATUS_OK;
+    }
+
+    void compensate_latency(dspu::Sample *dst, size_t samples)
+    {
+        size_t remove = lsp_min(samples, dst->length());
+        size_t length = dst->length() - remove;
+
+        for (size_t i=0, n=dst->channels(); i<n; ++i)
+        {
+            float *data = dst->channel(i);
+            dsp::move(data, &data[remove], length);
+        }
+
+        dst->set_length(length);
     }
 }
 

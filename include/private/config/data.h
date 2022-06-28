@@ -104,21 +104,23 @@ namespace timbremill
             config_t & operator = (const config_t &);
 
         public:
-            LSPString                               sSrcPath;       // Source path (for source files)
-            LSPString                               sDstPath;       // Destination path (for destination files)
-            LSPString                               sFile;          // Format of data output file name
-            ssize_t                                 nSampleRate;    // Sample rate for output files
-            ssize_t                                 nFftRank;       // FFT rank
-            ssize_t                                 nProduce;       // List of files to produce (flags)
-            float                                   fGainRange;     // Gain range (in decibels)
-            float                                   fDry;           // Amount of dry signal
-            float                                   fWet;           // Amount of wet signal
-            bool                                    bMastering;     // 'Mastering' feature
-            ssize_t                                 nNormalize;     // Normalization method
-            float                                   fNormGain;      // Normalization gain
+            LSPString                               sSrcPath;               // Source path (for source files)
+            LSPString                               sDstPath;               // Destination path (for destination files)
+            LSPString                               sFile;                  // Format of data output file name
+            ssize_t                                 nSampleRate;            // Sample rate for output files
+            ssize_t                                 nFftRank;               // FFT rank
+            ssize_t                                 nProduce;               // List of files to produce (flags)
+            float                                   fGainRange;             // Gain range (in decibels)
+            float                                   fDry;                   // Amount of dry signal
+            float                                   fWet;                   // Amount of wet signal
+            bool                                    bMastering;             // 'Mastering' feature
+            ssize_t                                 nNormalize;             // Normalization method
+            float                                   fNormGain;              // Normalization gain
+            bool                                    bLatencyCompensation;   // Compensate latency for processed tracks
+            bool                                    bMatchLength;           // Match the length of the output sample to the input sample
 
-            irfile_t                                sIR;            // IR file data
-            lltl::pphash<LSPString, fgroup_t>       vGroups;        // List of file groups
+            irfile_t                                sIR;                    // IR file data
+            lltl::pphash<LSPString, fgroup_t>       vGroups;                // List of file groups
 
         public:
             explicit config_t();

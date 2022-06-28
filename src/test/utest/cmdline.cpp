@@ -53,6 +53,8 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}-${file_name} - processed.wav"));
         UTEST_ASSERT(float_equals_absolute(cfg->fNormGain, -12.0f));
         UTEST_ASSERT(cfg->nNormalize == timbremill::NORM_ALWAYS);
+        UTEST_ASSERT(cfg->bLatencyCompensation == false);
+        UTEST_ASSERT(cfg->bMatchLength == true);
 
         // Validate "group1"
         UTEST_ASSERT(key.set_ascii("group1"));
@@ -99,6 +101,7 @@ UTEST_BEGIN("timbremill", cmdline)
             "-m",   "true",
             "-ng",  "-12",
             "-n",   "ALWAYS",
+            "-ml",  "true",
             "-c",
             NULL
         };
@@ -127,6 +130,7 @@ UTEST_BEGIN("timbremill", cmdline)
             "-cf",  "child-file1.wav",
             "-cf",  "child-file2.wav",
             "-f",   "out-file.wav",
+            "-lc",  "true",
             NULL
         };
 
@@ -166,6 +170,8 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(cfg->sFile.equals_ascii("out-file.wav"));
         UTEST_ASSERT(float_equals_absolute(cfg->fNormGain, 0.0f));
         UTEST_ASSERT(cfg->nNormalize == timbremill::NORM_NONE);
+        UTEST_ASSERT(cfg->bLatencyCompensation == true);
+        UTEST_ASSERT(cfg->bMatchLength == false);
 
         // Validate "test-group"
         UTEST_ASSERT(key.set_ascii("test-group"));

@@ -42,6 +42,8 @@ The example of batch file is the following:
 	"mastering" : false,
 	"normalize": "above",
 	"norm_gain": -6,
+	"latency_compensation": false,
+	"match_length": false,
 	
 	"ir": {
 		"head_cut": 45,
@@ -90,7 +92,9 @@ Here's the full description of all possible parameters which can be omitted in t
     * **fade_out** - the amount of linear fade-in (in percent) to add at the end of the IR file;
     * **file** - the name of the stripped impulse response file, by default "${master_name}/${file_name} - IR.wav";
     * **raw** - the name of the raw impulse response file, by default "${master_name}/${file_name} - Raw IR.wav";
+  * **latency_compensation** - remove extra samples that introduce latency from the beginning of the processed file;
   * **masetering** - enables the tool working in reverse mode (applying timbral correction from master to child files);
+  * **match_length** - remove extra samples from the output file to match the length of the source file.
   * **norm_gain** - the peak normalization gain (in decibels) at output;
   * **normalize** - the output file normaliztion:
     * **none** - do not use normalization (default);
@@ -122,28 +126,30 @@ Each name of the output file can be parametrized with the following predefined v
 The tool allows to override some batch parameters by specifying them as command-line arguments. The full list can be obtained by issuing ```timbre-mill --help``` command and is the following:
 
 ```
-  -c, --config           Configuration file name (required if no -mf option is set)
-  -cf, --child           The name of the child file (multiple options allowed)
-  -d, --dst-path         Destination path to store audio files
-  -dg, --dry             The amount (in dB) of unprocessed signal in output file
-  -f, --file             Format of the output file name
-  -fr, --fft-rank        The FFT rank (resolution) used for profiling
-  -g, --group            The group name for -cf (--child) option, "default" if not set
-  -h, --help             Output this help message
-  -ir, --ir-file         Format of the processed impulse response file name
-  -iw, --ir-raw          Format of the raw impulse response file name
-  -ifi, --ir-fade-in     The amount (in %) of fade-in for the IR file
-  -ifo, --ir-fade-out    The amount (in %) of fade-out for the IR file
-  -ihc, --ir-head-cut    The amount (in %) of head cut for the IR file
-  -itc, --ir-tail-cut    The amount (in %) of tail cut for the IR file
-  -m, --mastering        Work as auto-mastering tool instead of timbral correction
-  -mf, --master          The name of the master file
-  -n, --normalize        Set normalization mode
-  -ng, --norm-gain       Set normalization peak gain (in dB)
-  -p, --produce          Comma-separated list of produced output files (ir,raw,audio,all)
-  -s, --src-path         Source path to take files from
-  -sr, --srate           Sample rate of output files
-  -wg, --wet             The amount (in dB) of processed signal in output file
+  -c, --config                   Configuration file name (required if no -mf option is set)
+  -cf, --child                   The name of the child file (multiple options allowed)
+  -d, --dst-path                 Destination path to store audio files
+  -dg, --dry                     The amount (in dB) of unprocessed signal in output file
+  -f, --file                     Format of the output file name
+  -fr, --fft-rank                The FFT rank (resolution) used for profiling
+  -g, --group                    The group name for -cf (--child) option, "default" if not set
+  -h, --help                     Output this help message
+  -ir, --ir-file                 Format of the processed impulse response file name
+  -iw, --ir-raw                  Format of the raw impulse response file name
+  -ifi, --ir-fade-in             The amount (in %) of fade-in for the IR file
+  -ifo, --ir-fade-out            The amount (in %) of fade-out for the IR file
+  -ihc, --ir-head-cut            The amount (in %) of head cut for the IR file
+  -itc, --ir-tail-cut            The amount (in %) of tail cut for the IR file
+  -lc, --latency-compensation    The amount (in %) of tail cut for the IR file
+  -m, --mastering                Work as auto-mastering tool instead of timbral correction
+  -mf, --master                  The name of the master file
+  -ml, --match-length            Match the length of the output file to the input file
+  -n, --normalize                Set normalization mode
+  -ng, --norm-gain               Set normalization peak gain (in dB)
+  -p, --produce                  Comma-separated list of produced output files (ir,raw,audio,all)
+  -s, --src-path                 Source path to take files from
+  -sr, --srate                   Sample rate of output files
+  -wg, --wet                     The amount (in dB) of processed signal in output file
 
 ```
 

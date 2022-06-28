@@ -51,6 +51,8 @@ UTEST_BEGIN("timbremill", config)
         UTEST_ASSERT(cfg->sFile.equals_ascii("%{master_name}/test-${file_name} - processed.wav"));
         UTEST_ASSERT(float_equals_absolute(cfg->fNormGain, -10.0f));
         UTEST_ASSERT(cfg->nNormalize == timbremill::NORM_ABOVE);
+        UTEST_ASSERT(cfg->bLatencyCompensation == false);
+        UTEST_ASSERT(cfg->bMatchLength == true);
 
         // Validate "group1"
         UTEST_ASSERT(key.set_ascii("group1"));

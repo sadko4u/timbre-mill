@@ -211,10 +211,10 @@ namespace timbremill
                 // Need to produce audio file?
                 if (cfg->nProduce & OUT_AUDIO)
                 {
-                    dst     = (cfg->bMastering) ? &child : &master;
+                    src     = (cfg->bMastering) ? &child : &master;
 
                     // Convolve the trimmed IR file with the master sample
-                    if ((res = convolve(&af, dst, &ir, latency, dry, wet)) != STATUS_OK)
+                    if ((res = convolve(&af, src, &ir, latency, dry, wet)) != STATUS_OK)
                     {
                         fprintf(stderr, "  error convolving trimmed impulse response with master file, error code: %d\n", int(res));
                         return res;
@@ -226,6 +226,12 @@ namespace timbremill
                         fprintf(stderr, "  error normalizing output audio file, error code: %d\n", int(res));
                         return res;
                     }
+
+                    // Need to perform latency compensation?
+                    if (cfg->bLatencyCompensation)
+                        compensate_latency(&af, latency);
+                    if (cfg->bMatchLength)
+                        af.resize(af.channels(), src->length(), src->length());
 
                     // Save the convolved file
                     af.set_sample_rate(cfg->nSampleRate);

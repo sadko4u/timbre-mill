@@ -9,6 +9,8 @@
 	"mastering": true,
 	"normalize": "above",
 	"norm_gain": -10,
+	"latency_compensation": false,
+	"match_length": true,
 	
 	"produce": [ "raw", "audio" ],
 	
