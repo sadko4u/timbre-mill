@@ -41,40 +41,87 @@ ifndef PLATFORM
   endif
 endif
 
-# Detect processor architecture
+# Detect system processor architecture
 ifndef ARCHITECTURE
   ifeq ($(PLATFORM),Windows)
-    ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-      ARCHITECTURE             := i586
-    else ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-      ARCHITECTURE             := x86_64
-    else
-      ARCHITECTURE             := i586
-    endif
-  else # BUILD_PLATFORM != Windows
+    BUILD_ARCH             := $(PROCESSOR_ARCHITECTURE)
+  else
     BUILD_ARCH             := $(shell uname -m)
-    ifeq ($(patsubst armv6%,armv6,$(BUILD_ARCH)),armv6)
-      ARCHITECTURE           := arm32
-    else ifeq ($(patsubst armv7%,armv7,$(BUILD_ARCH)),armv7)
-      ARCHITECTURE           := arm32
-    else ifeq ($(patsubst armv8%,armv8,$(BUILD_ARCH)),armv8)
-      ARCHITECTURE           := aarch64
-    else ifeq ($(patsubst aarch64%,aarch64,$(BUILD_ARCH)),aarch64)
-      ARCHITECTURE           := aarch64
-    else ifeq ($(BUILD_ARCH),arm)
-      ARCHITECTURE           := arm32
-    else ifeq ($(BUILD_ARCH),x86_64)
-      ARCHITECTURE           := x86_64
-    else ifeq ($(BUILD_ARCH),amd64)
-      ARCHITECTURE           := x86_64
-    else ifeq ($(BUILD_ARCH),i86pc)
-      ARCHITECTURE           := x86_64
-    else ifeq ($(patsubst i%86,i586,$(BUILD_ARCH)),i586)
-      ARCHITECTURE           := i586
-    else
-      ARCHITECTURE           := $(BUILD_ARCH)
-    endif
-  endif # PLATFORM != Windows
+  endif
+else
+  BUILD_ARCH             := $(ARCHITECTURE)
+endif
+
+# Set actual architecture
+# The current architecture can be obtained by: gcc -Q --help=target
+ifeq ($(patsubst armv6%,armv6,$(BUILD_ARCH)),armv6)
+  override ARCHITECTURE   = arm32
+  ARCHITECTURE_FAMILY     = arm32
+  ARCHITECTURE_CFLAGS    := -march=armv6 -marm
+else ifeq ($(patsubst armv7ve%,armv7ve,$(BUILD_ARCH)),armv7ve)
+  override ARCHITECTURE   = arm32
+  ARCHITECTURE_FAMILY     = arm32
+  ARCHITECTURE_CFLAGS    := -march=armv7ve -marm
+else ifeq ($(patsubst armv7%,armv7,$(BUILD_ARCH)),armv7)
+  override ARCHITECTURE   = arm32
+  ARCHITECTURE_FAMILY     = arm32
+  ARCHITECTURE_CFLAGS    := -march=armv7-a -marm
+else ifeq ($(patsubst armv8%,armv8,$(BUILD_ARCH)),armv8)
+  override ARCHITECTURE   = aarch64
+  ARCHITECTURE_FAMILY     = aarch64
+  ARCHITECTURE_CFLAGS    := -march=armv8-a
+else ifeq ($(patsubst aarch64%,aarch64,$(BUILD_ARCH)),aarch64)
+  override ARCHITECTURE   = aarch64
+  ARCHITECTURE_FAMILY     = aarch64
+  ARCHITECTURE_CFLAGS    := -march=armv8-a
+else ifeq ($(BUILD_ARCH),arm32)
+  override ARCHITECTURE   = arm32
+  ARCHITECTURE_FAMILY     = arm32
+  ARCHITECTURE_CFLAGS    := -march=armv6 -marm
+else ifeq ($(BUILD_ARCH),arm)
+  override ARCHITECTURE   = arm32
+  ARCHITECTURE_FAMILY     = arm32
+  ARCHITECTURE_CFLAGS    := -march=armv6 -marm
+else ifeq ($(patsubst %x86_64%,x86_64,$(BUILD_ARCH)),x86_64)
+  override ARCHITECTURE   = x86_64
+  ARCHITECTURE_FAMILY     = x86_64
+  ARCHITECTURE_CFLAGS    := -march=x86-64 -m64
+else ifeq ($(patsubst %amd64%,amd64,$(BUILD_ARCH)),amd64)
+  override ARCHITECTURE   = x86_64
+  ARCHITECTURE_FAMILY     = x86_64
+  ARCHITECTURE_CFLAGS    := -march=x86-64 -m64
+else ifeq ($(patsubst %AMD64%,AMD64,$(BUILD_ARCH)),AMD64)
+  override ARCHITECTURE   = x86_64
+  ARCHITECTURE_FAMILY     = x86_64
+  ARCHITECTURE_CFLAGS    := -march=x86-64 -m64
+else ifeq ($(BUILD_ARCH),i86pc)
+  override ARCHITECTURE   = x86_64
+  ARCHITECTURE_FAMILY     = x86_64
+  ARCHITECTURE_CFLAGS    := -march=x86-64 -m64
+else ifeq ($(patsubst %i686%,i686,$(BUILD_ARCH)),i686)
+  override ARCHITECTURE   = i686
+  ARCHITECTURE_FAMILY     = ia32
+  ARCHITECTURE_CFLAGS    := -march=i686 -m32
+else ifeq ($(patsubst i%86,i586,$(BUILD_ARCH)),i586)
+  override ARCHITECTURE   = i586
+  ARCHITECTURE_FAMILY     = ia32
+  ARCHITECTURE_CFLAGS    := -march=i586 -m32
+else ifeq ($(BUILD_ARCH),x86)
+  override ARCHITECTURE   = i586
+  ARCHITECTURE_FAMILY     = ia32
+  ARCHITECTURE_CFLAGS    := -march=i586 -m32
+else ifeq ($(BUILD_ARCH),riscv32)
+  override ARCHITECTURE   = riscv32
+  ARCHITECTURE_FAMILY     = riscv32
+  ARCHITECTURE_CFLAGS    := -march=rv32imafdc -mabi=lp32d
+else ifeq ($(BUILD_ARCH),riscv64)
+  override ARCHITECTURE   = riscv64
+  ARCHITECTURE_FAMILY     = riscv64
+  ARCHITECTURE_CFLAGS    := -march=rv64imafdc -mabi=lp64d
+else
+  override ARCHITECTURE   = $(BUILD_ARCH)
+  ARCHITECTURE_FAMILY     = generic
+  ARCHITECTURE_CFLAGS    :=
 endif
 
 # Extension of libraries
@@ -151,8 +198,14 @@ TEST                       := 0
 
 # Set-up list of common variables
 COMMON_VARS = \
+	ROOTDIR \
+	ROOT_ARTIFACT_ID \
 	PLATFORM \
 	ARCHITECTURE \
+	ARCHITECTURE_FAMILY \
+	ARCHITECTURE_CFLAGS \
+	BUILDDIR \
+	FEATURES \
 	LIBRARY_EXT \
 	LIBRARY_PREFIX \
 	STATICLIB_EXT \
@@ -160,8 +213,10 @@ COMMON_VARS = \
 	PKGCONFIG_EXT \
 	PREFIX \
 	LIBDIR \
+	SHAREDDIR \
 	BINDIR \
 	INCDIR \
+	ETCDIR \
 	TEMPDIR \
 	TEST \
 	DEBUG \
@@ -171,21 +226,31 @@ COMMON_VARS = \
 .PHONY: sysvars
 
 sysvars:
-	@echo "List of available system variables:"
-	@echo "  ARCHITECTURE              target architecture to perform build"
-	@echo "  BINDIR                    location of the binaries"
-	@echo "  DEBUG                     build with debug options"
-	@echo "  EXECUTABLE_EXT            file extension for executable files"
-	@echo "  INCDIR                    location of the header files"
-	@echo "  LIBDIR                    location of the library"
-	@echo "  LIBRARY_EXT               file extension for library files"
-	@echo "  LIBRARY_PREFIX            prefix used for library file"
-	@echo "  PKGCONFIG_EXT             file extension for pkgconfig files"
-	@echo "  PLATFORM                  target software platform to perform build"
-	@echo "  PREFIX                    installation prefix for binary files"
-	@echo "  PROFILE                   build with profile options"
-	@echo "  STATICLIB_EXT             file extension for static library files"
-	@echo "  TEMPDIR                   location of temporary directory"
-	@echo "  TEST                      use test build"
-	@echo "  TRACE                     compile with additional trace information output"
+	echo "List of available system variables:"
+	echo "  ADD_FEATURES              list of features enabled in the build as an addition to default"
+	echo "  ARCHITECTURE              target architecture to perform build"
+	echo "  ARCHITECTURE_CFLAGS       compiler flags to specify architecture"
+	echo "  ARCHITECTURE_FAMILY       compiler flags to specify architecture family"
+	echo "  ARCHITECTURE_LDFLAGS      linker flags to specify architecture"
+	echo "  BINDIR                    location of the binaries"
+	echo "  BUILDDIR                  location of the build directory"
+	echo "  DEBUG                     build with debug options"
+	echo "  DEVEL                     build with modules checked out for read/write URL"
+	echo "  ETCDIR                    location of system configuration files"
+	echo "  EXECUTABLE_EXT            file extension for executable files"
+	echo "  FEATURES                  list of features enabled in the build"
+	echo "  INCDIR                    location of the header files"
+	echo "  LIBDIR                    location of the library"
+	echo "  LIBRARY_EXT               file extension for library files"
+	echo "  LIBRARY_PREFIX            prefix used for library file"
+	echo "  PKGCONFIG_EXT             file extension for pkgconfig files"
+	echo "  PLATFORM                  target software platform to perform build"
+	echo "  PREFIX                    installation prefix for binary files"
+	echo "  PROFILE                   build with profile options"
+	echo "  SHAREDDIR                 location of the shared files"
+	echo "  STATICLIB_EXT             file extension for static library files"
+	echo "  SUB_FEATURES              list of features disabled in the build as a subtraction of default"
+	echo "  TEMPDIR                   location of temporary directory"
+	echo "  TEST                      use test build"
+	echo "  TRACE                     compile with additional trace information output"
 

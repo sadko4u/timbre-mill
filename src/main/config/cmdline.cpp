@@ -33,33 +33,37 @@ namespace timbremill
 {
     static const char *options[] =
     {
-        "-c",   "--config",         "Configuration file name (required if no -mf option is set)",
-        "-cf",  "--child",          "The name of the child file (multiple options allowed)",
-        "-d",   "--dst-path",       "Destination path to store audio files",
-        "-dg",  "--dry",            "The amount (in dB) of unprocessed signal in output file",
-        "-f",   "--file",           "Format of the output file name",
-        "-fr",  "--fft-rank",       "The FFT rank (resolution) used for profiling",
-        "-g",   "--group",          "The group name for -cf (--child) option, \"default\" if not set",
-        "-h",   "--help",           "Output this help message",
-        "-ir",  "--ir-file",        "Format of the processed impulse response file name",
-        "-iw",  "--ir-raw",         "Format of the raw impulse response file name",
-        "-ifi", "--ir-fade-in",     "The amount (in %) of fade-in for the IR file",
-        "-ifo", "--ir-fade-out",    "The amount (in %) of fade-out for the IR file",
-        "-ihc", "--ir-head-cut",    "The amount (in %) of head cut for the IR file",
-        "-itc", "--ir-tail-cut",    "The amount (in %) of tail cut for the IR file",
-        "-m",   "--mastering",      "Work as auto-mastering tool instead of timbral correction",
-        "-mf",  "--master",         "The name of the master file",
-        "-n",   "--normalize",      "Set normalization mode",
-        "-ng",  "--norm-gain",      "Set normalization peak gain (in dB)",
-        "-p",   "--produce",        "Comma-separated list of produced output files (ir,raw,audio,all)",
-        "-s",   "--src-path",       "Source path to take files from",
-        "-sr",  "--srate",          "Sample rate of output files",
-        "-wg",  "--wet",            "The amount (in dB) of processed signal in output file",
+        "-c",   "--config",                 "Configuration file name (required if no -mf option is set)",
+        "-cf",  "--child",                  "The name of the child file (multiple options allowed)",
+        "-d",   "--dst-path",               "Destination path to store audio files",
+        "-dg",  "--dry",                    "The amount (in dB) of unprocessed signal in output file",
+        "-f",   "--file",                   "Format of the output file name",
+        "-fr",  "--fft-rank",               "The FFT rank (resolution) used for profiling",
+        "-frc", "--fr-child",               "The name of the frequency response file for the child file",
+        "-frm", "--fr-master",              "The name of the frequency response file for the master file",
+        "-g",   "--group",                  "The group name for -cf (--child) option, \"default\" if not set",
+        "-h",   "--help",                   "Output this help message",
+        "-ir",  "--ir-file",                "Format of the processed impulse response file name",
+        "-iw",  "--ir-raw",                 "Format of the raw impulse response file name",
+        "-ifi", "--ir-fade-in",             "The amount (in %) of fade-in for the IR file",
+        "-ifo", "--ir-fade-out",            "The amount (in %) of fade-out for the IR file",
+        "-ihc", "--ir-head-cut",            "The amount (in %) of head cut for the IR file",
+        "-itc", "--ir-tail-cut",            "The amount (in %) of tail cut for the IR file",
+        "-lc",  "--latency-compensation",   "The amount (in %) of tail cut for the IR file",
+        "-m",   "--mastering",              "Work as auto-mastering tool instead of timbral correction",
+        "-mf",  "--master",                 "The name of the master file",
+        "-ml",  "--match-length",           "Match the length of the output file to the input file",
+        "-n",   "--normalize",              "Set normalization mode",
+        "-ng",  "--norm-gain",              "Set normalization peak gain (in dB)",
+        "-p",   "--produce",                "Comma-separated list of produced output files (ir,frm,frc,raw,audio,all)",
+        "-s",   "--src-path",               "Source path to take files from",
+        "-sr",  "--srate",                  "Sample rate of output files",
+        "-wg",  "--wet",                    "The amount (in dB) of processed signal in output file",
 
         NULL
     };
 
-    status_t parse_cmdline_flags(ssize_t *dst, const char *name, const char *value, const cfg_flag_t *flags)
+    static status_t parse_cmdline_flags(ssize_t *dst, const char *name, const char *value, const cfg_flag_t *flags)
     {
         // Parse values
         size_t n = 0;
@@ -112,32 +116,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t print_usage(const char *name, bool fail)
-    {
-        LSPString buf, fmt;
-        size_t maxlen = 0;
-
-        // Estimate maximum parameter size
-        for (const char **p = timbremill::options; *p != NULL; p += 3)
-        {
-            buf.fmt_ascii("%s, %s", p[0], p[1]);
-            maxlen  = lsp_max(buf.length(), maxlen);
-        }
-        fmt.fmt_ascii("  %%-%ds    %%s\n", int(maxlen));
-
-        // Output usage
-        printf("usage: %s [arguments]\n", name);
-        printf("available arguments:\n");
-        for (const char **p = timbremill::options; *p != NULL; p += 3)
-        {
-            buf.fmt_ascii("%s, %s", p[0], p[1]);
-            printf(fmt.get_native(), buf.get_native(), p[2]);
-        }
-
-        return (fail) ? STATUS_BAD_ARGUMENTS : STATUS_SKIP;
-    }
-
-    status_t parse_cmdline_int(ssize_t *dst, const char *val, const char *parameter)
+    static status_t parse_cmdline_int(ssize_t *dst, const char *val, const char *parameter)
     {
         LSPString in;
         if (!in.set_native(val))
@@ -166,7 +145,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_cmdline_float(float *dst, const char *val, const char *parameter)
+    static status_t parse_cmdline_float(float *dst, const char *val, const char *parameter)
     {
         LSPString in;
         if (!in.set_native(val))
@@ -199,7 +178,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_cmdline_enum(ssize_t *dst, const char *parameter, const char *val, const cfg_flag_t *flags)
+    static status_t parse_cmdline_enum(ssize_t *dst, const char *parameter, const char *val, const cfg_flag_t *flags)
     {
         LSPString in;
         if (!in.set_native(val))
@@ -238,7 +217,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_cmdline_bool(bool *dst, const char *val, const char *parameter)
+    static status_t parse_cmdline_bool(bool *dst, const char *val, const char *parameter)
     {
         LSPString in;
         if (!in.set_native(val))
@@ -271,6 +250,31 @@ namespace timbremill
         *dst = bvalue;
 
         return STATUS_OK;
+    }
+
+    status_t print_usage(const char *name, bool fail)
+    {
+        LSPString buf, fmt;
+        size_t maxlen = 0;
+
+        // Estimate maximum parameter size
+        for (const char **p = timbremill::options; *p != NULL; p += 3)
+        {
+            buf.fmt_ascii("%s, %s", p[0], p[1]);
+            maxlen  = lsp_max(buf.length(), maxlen);
+        }
+        fmt.fmt_ascii("  %%-%ds    %%s\n", int(maxlen));
+
+        // Output usage
+        printf("usage: %s [arguments]\n", name);
+        printf("available arguments:\n");
+        for (const char **p = timbremill::options; *p != NULL; p += 3)
+        {
+            buf.fmt_ascii("%s, %s", p[0], p[1]);
+            printf(fmt.get_native(), buf.get_native(), p[2]);
+        }
+
+        return (fail) ? STATUS_BAD_ARGUMENTS : STATUS_SKIP;
     }
 
     status_t parse_cmdline(config_t *cfg, int argc, const char **argv)
@@ -512,6 +516,28 @@ namespace timbremill
         {
             if ((res = parse_cmdline_flags(&cfg->nProduce, "produce", val, produce_flags)) != STATUS_OK)
                 return res;
+        }
+        if ((val = options.get("--latency-compensation")) != NULL)
+        {
+            if ((res = parse_cmdline_bool(&cfg->bLatencyCompensation, val, "latency compensation")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--match-length")) != NULL)
+        {
+            if ((res = parse_cmdline_bool(&cfg->bMatchLength, val, "match length")) != STATUS_OK)
+                return res;
+        }
+        if ((val = options.get("--fr-master")) != NULL)
+        {
+            cfg->sIR.sFRMaster.set_native(val);
+            if (master)
+                cfg->nProduce |= OUT_FRM;
+        }
+        if ((val = options.get("--fr-child")) != NULL)
+        {
+            cfg->sIR.sFRChild.set_native(val);
+            if (master)
+                cfg->nProduce |= OUT_FRC;
         }
 
         return STATUS_OK;

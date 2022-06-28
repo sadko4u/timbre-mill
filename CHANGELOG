@@ -2,6 +2,13 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.6 ===
+* Added possibility to compensate latency for output files.
+* Added possibility to make output file duration match to the input file duration.
+* Added possibility to export frequency response files for master and children.
+* Updated dependencies on the external modules.
+* Updated build subsystem.
+
 === 0.5.5 ===
 * Fixed memory leakage issue.
 

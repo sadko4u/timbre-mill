@@ -77,10 +77,20 @@ namespace timbremill
      * @return status of operation
      */
     status_t timbre_impulse_response(
-            dspu::Sample *dst,
-            const dspu::Sample *master, const dspu::Sample *child,
-            size_t precision, float db_range
-    );
+        dspu::Sample *dst,
+        const dspu::Sample *master, const dspu::Sample *child,
+        size_t precision, float db_range);
+
+    /**
+     * Produce the linear impulse response from the spectral profile
+     *
+     * @param dst destination sample to store the impulse response
+     * @param profile the original profile
+     * @param precision the FFT precision
+     * @return status of operation
+     */
+    status_t profile_to_impulse_response(dspu::Sample *dst, const dspu::Sample *profile, size_t precision);
+
 
     /**
      * Perform trimming of impulse response file
@@ -92,11 +102,10 @@ namespace timbremill
      * @return status of operation
      */
     status_t trim_impulse_response(
-            dspu::Sample *dst,
-            ssize_t *latency,
-            const dspu::Sample *src,
-            const irfile_t *params
-    );
+        dspu::Sample *dst,
+        ssize_t *latency,
+        const dspu::Sample *src,
+        const irfile_t *params);
 
     /**
      * Convolve impulse response with the audio sample and store in another audio sample
@@ -119,6 +128,13 @@ namespace timbremill
      * @return status of operation
      */
     status_t normalize(dspu::Sample *dst, float gain, size_t mode);
+
+    /**
+     * Cut the first amount of samples from the sample file to compensate the latency
+     * @param dst destination sample to process
+     * @param samples number of samples to remove from beginning
+     */
+    void compensate_latency(dspu::Sample *dst, size_t samples);
 }
 
 

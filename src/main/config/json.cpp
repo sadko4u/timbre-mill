@@ -27,7 +27,7 @@ namespace timbremill
 {
     using namespace lsp;
 
-    status_t parse_json_config_string(LSPString *str, json::Parser *p)
+    static status_t parse_json_config_string(LSPString *str, json::Parser *p)
     {
         json::event_t ev;
 
@@ -44,7 +44,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_json_config_int(ssize_t *dst, json::Parser *p)
+    static status_t parse_json_config_int(ssize_t *dst, json::Parser *p)
     {
         json::event_t ev;
 
@@ -61,7 +61,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_json_config_float(float *dst, json::Parser *p)
+    static status_t parse_json_config_float(float *dst, json::Parser *p)
     {
         json::event_t ev;
 
@@ -80,7 +80,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_json_config_bool(bool *dst, json::Parser *p)
+    static status_t parse_json_config_bool(bool *dst, json::Parser *p)
     {
         json::event_t ev;
 
@@ -101,7 +101,7 @@ namespace timbremill
         return STATUS_OK;
     }
 
-    status_t parse_json_config_flags(ssize_t *dst, const cfg_flag_t *flags, json::Parser *p)
+    static status_t parse_json_config_flags(ssize_t *dst, const cfg_flag_t *flags, json::Parser *p)
     {
         json::event_t ev;
         ssize_t xdst = 0;
@@ -143,7 +143,7 @@ namespace timbremill
         return res;
     }
 
-    status_t parse_json_config_enum(ssize_t *dst, const cfg_flag_t *flags, json::Parser *p)
+    static status_t parse_json_config_enum(ssize_t *dst, const cfg_flag_t *flags, json::Parser *p)
     {
         json::event_t ev;
 
@@ -168,7 +168,7 @@ namespace timbremill
         return res;
     }
 
-    status_t parse_json_config_group_files(fgroup_t *grp, json::Parser *p)
+    static status_t parse_json_config_group_files(fgroup_t *grp, json::Parser *p)
     {
         json::event_t ev;
 
@@ -209,7 +209,7 @@ namespace timbremill
         return res;
     }
 
-    status_t parse_json_config_group(fgroup_t *grp, json::Parser *p)
+    static status_t parse_json_config_group(fgroup_t *grp, json::Parser *p)
     {
         json::event_t ev;
         bool master_set = false;
@@ -280,7 +280,7 @@ namespace timbremill
         return res;
     }
 
-    status_t parse_json_config_groups(config_t *cfg, json::Parser *p)
+    static status_t parse_json_config_groups(config_t *cfg, json::Parser *p)
     {
         json::event_t ev;
 
@@ -336,7 +336,7 @@ namespace timbremill
         return res;
     }
 
-    status_t parse_json_config_ir(irfile_t *ir, json::Parser *p)
+    static status_t parse_json_config_ir(irfile_t *ir, json::Parser *p)
     {
         json::event_t ev;
 
@@ -371,6 +371,10 @@ namespace timbremill
                 res = parse_json_config_string(&ir->sFile, p);
             else if (ev.sValue.equals_ascii("raw"))
                 res = parse_json_config_string(&ir->sRaw, p);
+            else if (ev.sValue.equals_ascii("fr_master"))
+                res = parse_json_config_string(&ir->sFRMaster, p);
+            else if (ev.sValue.equals_ascii("fr_child"))
+                res = parse_json_config_string(&ir->sFRChild, p);
             else
                 res = p->skip_current();
 
@@ -382,7 +386,7 @@ namespace timbremill
         return res;
     }
 
-    status_t parse_json_config_root(config_t *cfg, json::Parser *p)
+    static status_t parse_json_config_root(config_t *cfg, json::Parser *p)
     {
         json::event_t ev;
 
@@ -432,6 +436,10 @@ namespace timbremill
                 res = parse_json_config_bool(&cfg->bMastering, p);
             else if (ev.sValue.equals_ascii("norm_gain"))
                 res = parse_json_config_float(&cfg->fNormGain, p);
+            else if (ev.sValue.equals_ascii("latency_compensation"))
+                res = parse_json_config_bool(&cfg->bLatencyCompensation, p);
+            else if (ev.sValue.equals_ascii("match_length"))
+                res = parse_json_config_bool(&cfg->bMatchLength, p);
             else if (ev.sValue.equals_ascii("normalize"))
                 res = parse_json_config_enum(&cfg->nNormalize, normalize_flags, p);
             else

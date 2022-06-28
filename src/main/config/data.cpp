@@ -31,6 +31,8 @@ namespace timbremill
         { "raw",    OUT_RAW     },
         { "audio",  OUT_AUDIO   },
         { "all",    OUT_ALL     },
+        { "frm",    OUT_FRM     },
+        { "frc",    OUT_FRC     },
         { NULL,     0           }
     };
 
@@ -66,26 +68,30 @@ namespace timbremill
 
     irfile_t::irfile_t()
     {
-        fHeadCut        = 0.0f;
-        fTailCut        = 0.0f;
-        fFadeIn         = 0.0f;
-        fFadeOut        = 0.0f;
+        fHeadCut                = 0.0f;
+        fTailCut                = 0.0f;
+        fFadeIn                 = 0.0f;
+        fFadeOut                = 0.0f;
 
         sFile.set_ascii("${master_name}/${file_name} - IR.wav");
         sRaw.set_ascii("${master_name}/${file_name} - Raw IR.wav");
+        sFRMaster.set_ascii("${master_name}/${file_name} - FR Master.wav");
+        sFRChild.set_ascii("${master_name}/${file_name} - FR Child.wav");
     }
 
     config_t::config_t()
     {
-        nSampleRate     = 48000;
-        nFftRank        = 12;           // 4096 samples
-        fGainRange      = 48.0f;
-        fDry            = -1000.0f;     // Dry amount
-        fWet            = 0.0f;         // Wet amount
-        nProduce        = OUT_ALL;
-        bMastering      = false;        // Work as timbre-correction tool by default
-        nNormalize      = NORM_NONE;    // No normalization by default
-        fNormGain       = 0.0f;         // 0 dB gain by default
+        nSampleRate             = 48000;
+        nFftRank                = 12;           // 4096 samples
+        fGainRange              = 48.0f;
+        fDry                    = -1000.0f;     // Dry amount
+        fWet                    = 0.0f;         // Wet amount
+        nProduce                = OUT_ALL;
+        bMastering              = false;        // Work as timbre-correction tool by default
+        nNormalize              = NORM_NONE;    // No normalization by default
+        fNormGain               = 0.0f;         // 0 dB gain by default
+        bLatencyCompensation    = false;        // Do not compensate latency by default
+        bMatchLength            = false;        // Do not match length by default
 
         sFile.set_ascii("${master_name}/${file_name} - processed.wav");
     }

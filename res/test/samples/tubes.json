@@ -1,20 +1,24 @@
 {
 	"srate": 48000,
-	"dst_path": "tmp",
+	"dst_path": "tmp/test5",
 	"src_path": "res/test/samples",
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
-	"produce": [ "ir", "audio" ],
+	"produce": [ "ir", "audio", "frm", "frc" ],
 	"fft_rank": 16,
 	"dry" : -1000,
 	"wet" : 0,
+	"latency_compensation": true,
+	"match_length": true,
 	
 	"ir": {
-		"head_cut": 45,
-		"tail_cut": 5,
-		"fade_in": 2,
-		"fade_out": 50,
+		"head_cut": 0,
+		"tail_cut": 0,
+		"fade_in": 0,
+		"fade_out": 0,
 		"file": "${group}/${master_name}/${file_name} - IR.wav",
-		"raw": "${group}/${master_name}/${file_name} - Raw IR.wav"
+		"raw": "${group}/${master_name}/${file_name} - Raw IR.wav",
+		"fr_master": "${group}/${master_name}/${file_name} - FR Master.wav",
+		"fr_child": "${group}/${master_name}/${file_name} - FR Child.wav"
 	},
 
 	"groups": {
