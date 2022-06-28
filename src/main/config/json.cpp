@@ -371,6 +371,10 @@ namespace timbremill
                 res = parse_json_config_string(&ir->sFile, p);
             else if (ev.sValue.equals_ascii("raw"))
                 res = parse_json_config_string(&ir->sRaw, p);
+            else if (ev.sValue.equals_ascii("fr_master"))
+                res = parse_json_config_string(&ir->sFRMaster, p);
+            else if (ev.sValue.equals_ascii("fr_child"))
+                res = parse_json_config_string(&ir->sFRChild, p);
             else
                 res = p->skip_current();
 

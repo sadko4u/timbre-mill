@@ -31,6 +31,8 @@ namespace timbremill
         { "raw",    OUT_RAW     },
         { "audio",  OUT_AUDIO   },
         { "all",    OUT_ALL     },
+        { "frm",    OUT_FRM     },
+        { "frc",    OUT_FRC     },
         { NULL,     0           }
     };
 
@@ -73,6 +75,8 @@ namespace timbremill
 
         sFile.set_ascii("${master_name}/${file_name} - IR.wav");
         sRaw.set_ascii("${master_name}/${file_name} - Raw IR.wav");
+        sFRMaster.set_ascii("${master_name}/${file_name} - FR Master.wav");
+        sFRChild.set_ascii("${master_name}/${file_name} - FR Child.wav");
     }
 
     config_t::config_t()

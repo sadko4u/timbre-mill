@@ -350,6 +350,47 @@ namespace timbremill
         return STATUS_OK;
     }
 
+    status_t profile_to_impulse_response(dspu::Sample *dst, const dspu::Sample *profile, size_t precision)
+    {
+        dspu::Sample out;
+
+        // Process each channel of the samples
+        uint8_t *ptr    = NULL;
+        size_t bins     = 1 << precision;
+        size_t half     = bins >> 1;
+
+        // Allocate the buffers for processing
+        size_t to_alloc = bins * 2 + bins * 2; // fft + tmp + wnd
+        float *fft      = alloc_aligned<float>(ptr, to_alloc, 64);
+        float *tmp      = &fft[bins * 2];
+        float *wnd      = &tmp[bins];
+        if (fft == NULL)
+            return STATUS_NO_MEM;
+
+        dspu::windows::blackman_nuttall(wnd, bins);
+        out.resize(profile->channels(), bins, bins);
+
+        // Make impulse response for each channel
+        for (size_t i=0, n=out.channels(); i<n; ++i)
+        {
+            float *dst_chan = out.channel(i);
+            const float *src_chan = profile->channel(i);
+
+            dsp::pcomplex_r2c(fft, src_chan, bins);                 // Prepare the FFT buffer with zero phase
+            dsp::packed_reverse_fft(fft, fft, precision);           // Perform reverse FFT
+            dsp::pcomplex_c2r(tmp, fft, bins);                      // Convert back to real data, drop complex data which is 0
+            dsp::copy(dst_chan, &tmp[half], half);                  // Make the IR linear-phase
+            dsp::copy(&dst_chan[half], tmp, half);
+            dsp::mul2(dst_chan, wnd, bins);                         // Apply window
+        }
+
+        // Release allocated data and return result
+        dst->swap(&out);
+        free_aligned(ptr);
+
+        return STATUS_OK;
+    }
+
     status_t trim_impulse_response(
         dspu::Sample *dst,
         ssize_t *latency,

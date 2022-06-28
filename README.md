@@ -36,7 +36,7 @@ The example of batch file is the following:
 	"src_path": "/home/user/in",
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
 	"fft_rank": 16,
-	"produce": [ "ir", "audio" ],
+	"produce": [ "ir", "audio", "frm", "frc" ],
 	"dry" : -12,
 	"wet" : 0,
 	"mastering" : false,
@@ -51,7 +51,9 @@ The example of batch file is the following:
 		"fade_in": 2,
 		"fade_out": 50,
 		"file": "${group}/${master_name}/${file_name} - IR.wav",
-		"raw": "${group}/${master_name}/${file_name} - Raw IR.wav"
+		"raw": "${group}/${master_name}/${file_name} - Raw IR.wav",
+		"fr_master": "${group}/${master_name}/${file_name} - FR Master.wav",
+		"fr_child": "${group}/${master_name}/${file_name} - FR Child.wav"
 	},
 
 	"groups": {
@@ -91,6 +93,10 @@ Here's the full description of all possible parameters which can be omitted in t
     * **fade_in** - the amount of linear fade-in (in percent) to add at the beginning of the IR file;
     * **fade_out** - the amount of linear fade-in (in percent) to add at the end of the IR file;
     * **file** - the name of the stripped impulse response file, by default "${master_name}/${file_name} - IR.wav";
+    * **fr_master** - the name of the impulse response file with the frequency response that matches the master file,
+      by default "${master_name}/${file_name} - FR Master.wav";
+    * **fr_child** - the name of the impulse response file with the frequency response that matches the child file,
+      by default "${master_name}/${file_name} - FR Child.wav";
     * **raw** - the name of the raw impulse response file, by default "${master_name}/${file_name} - Raw IR.wav";
   * **latency_compensation** - remove extra samples that introduce latency from the beginning of the processed file;
   * **masetering** - enables the tool working in reverse mode (applying timbral correction from master to child files);
@@ -104,6 +110,8 @@ Here's the full description of all possible parameters which can be omitted in t
   * **produce** - the array of strings that indicates the list of files to produce, ```[ "all" ]``` by default:
     * **all** - produce all types of files: IR, raw IR, processed audio;
     * **audio** - produce processed audio file;
+    * **frc** - produce IR file that matches frequency response of the child file;
+    * **frm** - produce IR file that matches frequency response of the master file;
     * **ir** - produce IR file;
     * **raw** - produce raw IR file;
   * **srate** - the sample rate for output files (IR, stripped IR and the processed master files), default 48000;
@@ -132,6 +140,8 @@ The tool allows to override some batch parameters by specifying them as command-
   -dg, --dry                     The amount (in dB) of unprocessed signal in output file
   -f, --file                     Format of the output file name
   -fr, --fft-rank                The FFT rank (resolution) used for profiling
+  -frc, --fr-child               The name of the frequency response file for the child file
+  -frm, --fr-master              The name of the frequency response file for the master file
   -g, --group                    The group name for -cf (--child) option, "default" if not set
   -h, --help                     Output this help message
   -ir, --ir-file                 Format of the processed impulse response file name
@@ -146,7 +156,7 @@ The tool allows to override some batch parameters by specifying them as command-
   -ml, --match-length            Match the length of the output file to the input file
   -n, --normalize                Set normalization mode
   -ng, --norm-gain               Set normalization peak gain (in dB)
-  -p, --produce                  Comma-separated list of produced output files (ir,raw,audio,all)
+  -p, --produce                  Comma-separated list of produced output files (ir,frm,frc,raw,audio,all)
   -s, --src-path                 Source path to take files from
   -sr, --srate                   Sample rate of output files
   -wg, --wet                     The amount (in dB) of processed signal in output file
@@ -155,6 +165,8 @@ The tool allows to override some batch parameters by specifying them as command-
 
 If the option ```-mf``` is specified, the default value of ```-p``` option is reset to ```audio```. Additionally:
 * Specifying the ```-ir``` option automatically adds the ```ir``` item to the ```-p``` option.
+* Specifying the ```-frc``` and ```-frm``` options automatically adds the ```frm``` and ```frc```
+  items respectively to the ```-p``` option.
 * The same behaviour is also true for ```-iw``` option which automatically adds the ```raw``` item to the ```-p``` option.
 * Explicitly specified ```-p``` option won't be overridden by the ```-mf```, ```-ir``` and ```-iw``` options.
 

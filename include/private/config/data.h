@@ -36,8 +36,10 @@ namespace timbremill
         OUT_IR      = 1 << 0,
         OUT_RAW     = 1 << 1,
         OUT_AUDIO   = 1 << 2,
+        OUT_FRM     = 1 << 3,
+        OUT_FRC     = 1 << 4,
 
-        OUT_ALL     = OUT_IR | OUT_RAW | OUT_AUDIO
+        OUT_ALL     = OUT_IR | OUT_RAW | OUT_AUDIO | OUT_FRM | OUT_FRC
     };
 
     enum normalize_t
@@ -90,6 +92,8 @@ namespace timbremill
             float                   fFadeOut;       // Tail fade-out (%)
             LSPString               sFile;          // Format of IR file name with modifications
             LSPString               sRaw;           // Format of IR file name without modifications
+            LSPString               sFRMaster;      // Format of IR file for the frquency response of the master
+            LSPString               sFRChild;       // Format of IR file for the frquency response of the child
 
         public:
             explicit irfile_t();

@@ -99,7 +99,7 @@ namespace timbremill
 
     status_t process_file_group(config_t *cfg, fgroup_t *fg)
     {
-        dspu::Sample master, mp, *src, *dst;
+        dspu::Sample master, mp, *src, *dst, ir;
         expr::Variables vars;
         status_t res;
         ssize_t fft_rank    = lsp_limit(cfg->nFftRank, FFT_MIN, FFT_MAX);
@@ -113,15 +113,17 @@ namespace timbremill
             fprintf(stdout, "  group '%s' does not have master file, skipping\n", fg->sName.get_native());
             return STATUS_OK;
         }
-        else if (fg->vFiles.is_empty())
-        {
-            fprintf(stdout, "  group '%s' does not have any child files, skipping\n", fg->sName.get_native());
-            return STATUS_OK;
-        }
 
         // Check that at least one option is specified to produce
         if (!cfg->nProduce)
             return STATUS_OK;
+
+        // Shall we produce something?
+        if ((fg->vFiles.is_empty()) && (!(cfg->nProduce & OUT_FRM)))
+        {
+            fprintf(stdout, "  group '%s' does not have any child files, skipping\n", fg->sName.get_native());
+            return STATUS_OK;
+        }
 
         // Read the master file
         if ((res = load_audio_file(&master, cfg->nSampleRate, &cfg->sSrcPath, &fg->sMaster)) != STATUS_OK)
@@ -134,9 +136,30 @@ namespace timbremill
             return res;
         }
 
+        // Produce spectral profile of master if required
+        if (cfg->nProduce & OUT_FRM)
+        {
+            // Build variables
+            if ((res = build_variables(&vars, cfg, fg, &fg->sMaster, &fg->sMaster)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error building pattern variables for master file\n");
+                return res;
+            }
+
+            if ((res = profile_to_impulse_response(&ir, &mp, fft_rank)) != STATUS_OK)
+            {
+                fprintf(stderr, "  error computing frequrency response for the the master file '%s'\n", fg->sName.get_native());
+                return res;
+            }
+            ir.set_sample_rate(cfg->nSampleRate);
+            if ((res = save_audio_file(&ir, &cfg->sDstPath, &cfg->sIR.sFRMaster, &vars)) != STATUS_OK)
+                return res;
+        }
+
+        // Process child files in the group
         for (size_t i=0, n=fg->vFiles.size(); i<n; ++i)
         {
-            dspu::Sample child, cp, ir, raw_ir, af;
+            dspu::Sample child, cp, raw_ir, af;
             LSPString *fname = fg->vFiles.uget(i);
             if (fname == NULL)
             {
@@ -147,7 +170,7 @@ namespace timbremill
             // Build variables
             if ((res = build_variables(&vars, cfg, fg, &fg->sMaster, fname)) != STATUS_OK)
             {
-                fprintf(stderr, "  error building pattern variables\n");
+                fprintf(stderr, "  error building pattern variables for child file\n");
                 return res;
             }
 
@@ -166,6 +189,19 @@ namespace timbremill
             {
                 fprintf(stderr, "  error computing spectral profile for the child file '%s'\n", fname->get_native());
                 return res;
+            }
+
+            // Produce spectral profile of child if required
+            if (cfg->nProduce & OUT_FRC)
+            {
+                if ((res = profile_to_impulse_response(&ir, &cp, fft_rank)) != STATUS_OK)
+                {
+                    fprintf(stderr, "  error computing frequrency response for the the child file '%s'\n", fname->get_native());
+                    return res;
+                }
+                ir.set_sample_rate(cfg->nSampleRate);
+                if ((res = save_audio_file(&ir, &cfg->sDstPath, &cfg->sIR.sFRChild, &vars)) != STATUS_OK)
+                    return res;
             }
 
             // Compute the impulse response of the file

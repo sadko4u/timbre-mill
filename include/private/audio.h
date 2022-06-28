@@ -82,6 +82,17 @@ namespace timbremill
         size_t precision, float db_range);
 
     /**
+     * Produce the linear impulse response from the spectral profile
+     *
+     * @param dst destination sample to store the impulse response
+     * @param profile the original profile
+     * @param precision the FFT precision
+     * @return status of operation
+     */
+    status_t profile_to_impulse_response(dspu::Sample *dst, const dspu::Sample *profile, size_t precision);
+
+
+    /**
      * Perform trimming of impulse response file
      *
      * @param dst destination sample to store trimmed data

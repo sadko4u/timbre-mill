@@ -39,6 +39,8 @@ namespace timbremill
         "-dg",  "--dry",                    "The amount (in dB) of unprocessed signal in output file",
         "-f",   "--file",                   "Format of the output file name",
         "-fr",  "--fft-rank",               "The FFT rank (resolution) used for profiling",
+        "-frc", "--fr-child",               "The name of the frequency response file for the child file",
+        "-frm", "--fr-master",              "The name of the frequency response file for the master file",
         "-g",   "--group",                  "The group name for -cf (--child) option, \"default\" if not set",
         "-h",   "--help",                   "Output this help message",
         "-ir",  "--ir-file",                "Format of the processed impulse response file name",
@@ -53,7 +55,7 @@ namespace timbremill
         "-ml",  "--match-length",           "Match the length of the output file to the input file",
         "-n",   "--normalize",              "Set normalization mode",
         "-ng",  "--norm-gain",              "Set normalization peak gain (in dB)",
-        "-p",   "--produce",                "Comma-separated list of produced output files (ir,raw,audio,all)",
+        "-p",   "--produce",                "Comma-separated list of produced output files (ir,frm,frc,raw,audio,all)",
         "-s",   "--src-path",               "Source path to take files from",
         "-sr",  "--srate",                  "Sample rate of output files",
         "-wg",  "--wet",                    "The amount (in dB) of processed signal in output file",
@@ -524,6 +526,18 @@ namespace timbremill
         {
             if ((res = parse_cmdline_bool(&cfg->bMatchLength, val, "match length")) != STATUS_OK)
                 return res;
+        }
+        if ((val = options.get("--fr-master")) != NULL)
+        {
+            cfg->sIR.sFRMaster.set_native(val);
+            if (master)
+                cfg->nProduce |= OUT_FRM;
+        }
+        if ((val = options.get("--fr-child")) != NULL)
+        {
+            cfg->sIR.sFRChild.set_native(val);
+            if (master)
+                cfg->nProduce |= OUT_FRC;
         }
 
         return STATUS_OK;
