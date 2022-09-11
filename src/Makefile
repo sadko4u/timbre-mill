@@ -54,19 +54,21 @@ ARTIFACT_MFLAGS         = $($(HOST)$(ARTIFACT_ID)_MFLAGS) $(foreach dep,$(DEPEND
 ARTIFACT_TEST_BIN       = $(ARTIFACT_BIN)/$(ARTIFACT_NAME)-test$(EXECUTABLE_EXT)
 ARTIFACT_EXE            = $(ARTIFACT_BIN)/$(ARTIFACT_NAME)-$(ARTIFACT_VERSION)$(EXECUTABLE_EXT)
 ARTIFACT_EXELINK        = $(ARTIFACT_NAME)$(EXECUTABLE_EXT)
-ARTIFACT_DEPS           = $(call dquery, OBJ, $(ARTIFACT_DEPENDENCIES))
-ARTIFACT_CFLAGS         = $(call query, CFLAGS, $(ARTIFACT_DEPENDENCIES) $(HOST)$(ARTIFACT_ID))
-ARTIFACT_LDFLAGS        = $(call query, LDFLAGS, $(ARTIFACT_DEPENDENCIES) $(HOST)$(ARTIFACT_ID))
-ARTIFACT_OBJFILES       = $(call query, OBJ, $(ARTIFACT_DEPENDENCIES) $(HOST)$(ARTIFACT_ID))
+ARTIFACT_OBJ            = $($(ARTIFACT_ID)_OBJ)
+ARTIFACT_OBJ_TEST       = $($(ARTIFACT_ID)_OBJ_TEST)
+ARTIFACT_DEPS           = $(call dquery, OBJ, $(DEPENDENCIES))
+ARTIFACT_CFLAGS         = $(call query, CFLAGS, $(DEPENDENCIES) $(ARTIFACT_ID))
+ARTIFACT_LDFLAGS        = $(call query, LDFLAGS, $(DEPENDENCIES) $(ARTIFACT_ID))
+ARTIFACT_OBJFILES       = $(call query, OBJ, $(DEPENDENCIES) $(ARTIFACT_ID))
 
 ARTIFACT_TARGETS        = $(ARTIFACT_EXE)
 
 # Source code
 CXX_SRC_MAIN            = $(filter-out main/main.cpp,$(call rwildcard, main, *.cpp))
+CXX_SRC_EXPORT          = 
 CXX_SRC_TEST            = $(call rwildcard, test, *.cpp)
-CXX_SRC_NOTEST          =
-CXX_SRC_EXT             =
 CXX_SRC_NOTEST          = main/main.cpp  
+CXX_SRC_EXT             =
 CXX_SRC                 = $(CXX_SRC_MAIN) $(CXX_SRC_EXT)
 
 CXX_OBJ_MAIN            = $(patsubst %.cpp, $(ARTIFACT_BIN)/%.o, $(CXX_SRC_MAIN))
@@ -81,19 +83,14 @@ CXX_FILE                = $(patsubst $(ARTIFACT_BIN)/%.o,%.cpp, $(@))
 CXX_HDR_PATHS           = $(foreach hdr,$(ARTIFACT_HEADERS),$(ARTIFACT_INC)/$(hdr))
 CXX_HEADERS             = $(foreach path,$(CXX_HDR_PATHS),$(call rwildcard, $(path), *.h))
 CXX_INSTHEADERS         = $(patsubst $(ARTIFACT_INC)/%,$(DESTDIR)$(INCDIR)/%,$(CXX_HEADERS))
-CXX_INSTALL_HEADERS     = 
 
-ifeq ($(HEADERS),1)
-  CXX_INSTALL_HEADERS     = 1
-endif
-
-BUILD_ALL               = $(ARTIFACT_LIB) $(ARTIFACT_SLIB) $(ARTIFACT_PC)
+BUILD_ALL               = $(ARTIFACT_EXE)
 
 ifeq ($($(ARTIFACT_ID)_TESTING),1)
   ARTIFACT_TARGETS       += $(ARTIFACT_TEST_BIN)
 endif
 
-DEP_CXX                 = $(foreach src,$(CXX_SRC_MAIN) $(CXX_SRC_EXPORT) $(CXX_SRC_EXT) $(CXX_SRC_TEST),$(patsubst %.cpp,$(ARTIFACT_BIN)/%.d,$(src)))
+DEP_CXX                 = $(foreach src,$(CXX_SRC_MAIN) $(CXX_SRC_EXT) $(CXX_SRC_TEST) $(CXX_SRC_NOTEST),$(patsubst %.cpp,$(ARTIFACT_BIN)/%.d,$(src)))
 DEP_CXX_FILE            = $(patsubst $(ARTIFACT_BIN)/%.d,%.cpp,$(@))
 DEP_DEP_FILE            = $(patsubst $(ARTIFACT_BIN)/%.d,%.o,$(@))
 
@@ -144,10 +141,10 @@ $(ARTIFACT_OBJ_TEST): $(CXX_OBJ_TEST)
 # Linking
 all: $(ARTIFACT_TARGETS)
 
-$(ARTIFACT_EXE): $(ARTIFACT_DEPS) $(ARTIFACT_OBJ) $(CXX_OBJ_EXPORT) $(CXX_OBJ_NOTEST)
+$(ARTIFACT_EXE): $(ARTIFACT_DEPS) $(ARTIFACT_OBJ) $(CXX_OBJ_NOTEST)
 	echo "  $($(HOST)CXX)  [$(ARTIFACT_NAME)] $(notdir $(ARTIFACT_EXE))"
 	$($(HOST)CXX) -o $(ARTIFACT_EXE) $(ARTIFACT_OBJFILES) $(CXX_OBJ_EXPORT) $(CXX_OBJ_NOTEST) $($(HOST)EXE_FLAGS) $(ARTIFACT_LDFLAGS)
-	
+
 $(ARTIFACT_TEST_BIN): $(ARTIFACT_DEPS) $(ARTIFACT_OBJ) $(ARTIFACT_OBJ_TEST)
 	echo "  $($(HOST)CXX)  [$(ARTIFACT_NAME)] $(notdir $(ARTIFACT_TEST_BIN))"
 	$($(HOST)CXX) -o $(ARTIFACT_TEST_BIN) $(ARTIFACT_OBJFILES) $(ARTIFACT_OBJ_TEST) $($(HOST)EXE_FLAGS) $(ARTIFACT_LDFLAGS)
