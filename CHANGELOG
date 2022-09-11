@@ -2,6 +2,12 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.7 ===
+* Support of AArch64 and ARMv7 architectures.
+* Better compatibility with Clang compiler.
+* Migration to C++ 11 standard and above.
+* Updated build system and dependencies.
+
 === 0.5.6 ===
 * Added possibility to compensate latency for output files.
 * Added possibility to make output file duration match to the input file duration.

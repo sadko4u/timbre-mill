@@ -19,10 +19,8 @@
 #
 
 #------------------------------------------------------------------------------
-# List of dependencies
+# List of common dependencies
 DEPENDENCIES = \
-  LIBPTHREAD \
-  LIBDL \
   LSP_COMMON_LIB \
   LSP_LLTL_LIB \
   LSP_RUNTIME_LIB \
@@ -32,37 +30,59 @@ DEPENDENCIES = \
 TEST_DEPENDENCIES = \
   LSP_TEST_FW
 
-# Platform-dependent
+#------------------------------------------------------------------------------
+# Linux dependencies
+LINUX_DEPENDENCIES = \
+  LIBPTHREAD \
+  LIBDL \
+  LIBSNDFILE
+
+LINUX_TEST_DEPENDENCIES =
+
 ifeq ($(PLATFORM),Linux)
-  DEPENDENCIES += \
-    LIBSNDFILE
+  DEPENDENCIES             += $(LINUX_DEPENDENCIES)
+  TEST_DEPENDENCIES        += $(LINUX_TEST_DEPENDENCIES)
 endif
+
+#------------------------------------------------------------------------------
+# BSD dependencies
+BSD_DEPENDENCIES = \
+  LIBPTHREAD \
+  LIBDL \
+  LIBICONV \
+  LIBSNDFILE
+
+BSD_TEST_DEPENDENCIES =
 
 ifeq ($(PLATFORM),BSD)
-  DEPENDENCIES += \
-    LIBSNDFILE \
-    LIBICONV
+  DEPENDENCIES             += $(BSD_DEPENDENCIES)
+  TEST_DEPENDENCIES        += $(BSD_TEST_DEPENDENCIES)
 endif
+
+#------------------------------------------------------------------------------
+# Windows dependencies
+WINDOWS_DEPENDENCIES = \
+  LIBSHLWAPI \
+  LIBWINMM \
+  LIBMSACM \
+  LIBMPR
+
+WINDOWS_TEST_DEPENDENCIES =
 
 ifeq ($(PLATFORM),Windows)
-  DEPENDENCIES += \
-    LIBSHLWAPI \
-    LIBWINMM \
-    LIBMSACM
+  DEPENDENCIES             += $(WINDOWS_DEPENDENCIES)
+  TEST_DEPENDENCIES        += $(WINDOWS_TEST_DEPENDENCIES)
 endif
 
+#------------------------------------------------------------------------------
 # Overall system dependencies
 ALL_DEPENDENCIES = \
   $(DEPENDENCIES) \
+  $(LINUX_DEPENDENCIES) \
+  $(BSD_DEPENDENCIES) \
+  $(WINDOWS_DEPENDENCIES) \
   $(TEST_DEPENDENCIES) \
-  LIBSNDFILE \
-  LIBICONV \
-  LIBSHLWAPI \
-  LIBWINMM \
-  LIBMSACM
-
-
-
-
-
+  $(LINUX_TEST_DEPENDENCIES) \
+  $(BSD_TEST_DEPENDENCIES) \
+  $(WINDOWS_TEST_DEPENDENCIES)
 

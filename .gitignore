@@ -7,11 +7,12 @@
 /.cproject
 /.project
 /Debug/
-/Release
+/Release/
 *.log
 /gmon.out
 **/*.gmon
 *.core
 /.config.mk
 /INSTALL/
+/modules/
 /tmp
