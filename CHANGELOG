@@ -3,6 +3,7 @@
 *******************************************************************************
 
 === 0.5.8 ===
+* Updated dependencies.
 
 === 0.5.7 ===
 * Support of AArch64 and ARMv7 architectures.
