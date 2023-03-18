@@ -35,15 +35,16 @@ namespace timbremill
     using namespace lsp;
 
     /**
-     * Load audio file
+     * Load audio file and perform resampling
      *
      * @param sample sample to store audio data
+     * @param file_srate pointer to save original file's sample rate
      * @param srate desired sample rate
      * @param base base directory
      * @param name name of the file
      * @return status of operation
      */
-    status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *base, const LSPString *name);
+    status_t load_audio_file(dspu::Sample *sample, size_t *file_srate, size_t srate, const LSPString *base, const LSPString *name);
 
     /**
      * Save audio file
@@ -67,19 +68,25 @@ namespace timbremill
     status_t spectral_profile(dspu::Sample *profile, const dspu::Sample *src, size_t precision);
 
     /**
-     * Compute the impulse response for timbral correction
+     * Compute the impulse response for timbral correction. The spectral correction is computed
+     * as a result of division of the child spectral characteristics by master spectral
+     * characteristics. Frequencies above the niquist frequency with subtracted transition octaves
+     * are considered as transitional and are not affected by the timbral correction
      *
      * @param dst destination sample to store the impulse response
      * @param master the master profile
      * @param child the child file profile
      * @param precision the FFT precision
      * @param db_range the dynamic range
+     * @param sample rate the actual signal limiting sample rate
+     * @param transition transition zone in octaves (number of transition octaves)
      * @return status of operation
      */
     status_t timbre_impulse_response(
         dspu::Sample *dst,
         const dspu::Sample *master, const dspu::Sample *child,
-        size_t precision, float db_range);
+        size_t precision, float db_range, size_t sample_rate,
+        float transition);
 
     /**
      * Produce the linear impulse response from the spectral profile
@@ -87,6 +94,7 @@ namespace timbremill
      * @param dst destination sample to store the impulse response
      * @param profile the original profile
      * @param precision the FFT precision
+     * @param top_sr
      * @return status of operation
      */
     status_t profile_to_impulse_response(dspu::Sample *dst, const dspu::Sample *profile, size_t precision);

@@ -3,6 +3,7 @@
 	"src_path": "/home/test",
 	"dst_path": "/home/out",
 	"gain_range": 72,
+	"transition_zone": 1.5,
 	"fft_rank": 16,
 	"dry": -18,
 	"wet": -6,

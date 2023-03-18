@@ -84,6 +84,7 @@ namespace timbremill
         nSampleRate             = 48000;
         nFftRank                = 12;           // 4096 samples
         fGainRange              = 48.0f;
+        fTransition             = 0.5f;         // Transition zone
         fDry                    = -1000.0f;     // Dry amount
         fWet                    = 0.0f;         // Wet amount
         nProduce                = OUT_ALL;
@@ -125,5 +126,5 @@ namespace timbremill
         }
         return NULL;
     }
-}
+} /* namespace timbremill */
 

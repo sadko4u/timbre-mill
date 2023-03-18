@@ -35,17 +35,18 @@ MTEST_BEGIN("timbremill", profile)
         lsp::dspu::Sample s, pu, pp, ct;
         LSPString base, name;
         io::Path out;
+        size_t file_sr = 0;
 
         // Load the 'unmuted' audio file and compute spectral profile
         MTEST_ASSERT(base.set_native(resources()));
         MTEST_ASSERT(name.set_ascii("samples/trumpet/trp unmuted.wav"));
-        MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
+        MTEST_ASSERT(timbremill::load_audio_file(&s, &file_sr, SAMPLE_RATE, &base, &name) == STATUS_OK);
         MTEST_ASSERT(timbremill::spectral_profile(&pu, &s, FFT_PRECISION) == STATUS_OK);
 
         // Load the 'plunger' audio file and compute spectral profile
         MTEST_ASSERT(base.set_native(resources()));
         MTEST_ASSERT(name.set_ascii("samples/trumpet/trp plunger.wav"));
-        MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
+        MTEST_ASSERT(timbremill::load_audio_file(&s, &file_sr, SAMPLE_RATE, &base, &name) == STATUS_OK);
         MTEST_ASSERT(timbremill::spectral_profile(&pp, &s, FFT_PRECISION) == STATUS_OK);
 
         // Compute the correction timbre
