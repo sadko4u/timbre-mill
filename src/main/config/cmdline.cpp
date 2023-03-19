@@ -58,6 +58,7 @@ namespace timbremill
         "-p",   "--produce",                "Comma-separated list of produced output files (ir,frm,frc,raw,audio,all)",
         "-s",   "--src-path",               "Source path to take files from",
         "-sr",  "--srate",                  "Sample rate of output files",
+        "-tz",  "--transition-zone",        "The value of the frequency transition zone (in octaves)",
         "-wg",  "--wet",                    "The amount (in dB) of processed signal in output file",
 
         NULL
@@ -497,6 +498,11 @@ namespace timbremill
             if ((res = parse_cmdline_float(&cfg->fWet, val, "wet")) != STATUS_OK)
                 return res;
         }
+        if ((val = options.get("--transition-zone")) != NULL)
+        {
+            if ((res = parse_cmdline_float(&cfg->fTransition, val, "transition-zone")) != STATUS_OK)
+                return res;
+        }
         if ((val = options.get("--mastering")) != NULL)
         {
             if ((res = parse_cmdline_bool(&cfg->bMastering, val, "mastering")) != STATUS_OK)
@@ -542,7 +548,7 @@ namespace timbremill
 
         return STATUS_OK;
     }
-}
+} /* namespace timbremill */
 
 
 

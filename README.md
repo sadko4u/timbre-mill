@@ -12,6 +12,14 @@ which allow to tune tonal characteristics of the master file to match
 the tonal characteristics of each corresponding child file. These raw IR files
 allow to process audio data as linear-phase finite impulse response filters (FIRs).
 
+Note that input files may have different sample rates. The minimum sample rate
+is considered as a cut-off frequency. Additionally, the transition zone (which is
+0.5 octaves by default) is applied to cut-off frequency to reduce the effect of low-pass
+cut-off filter applied to the signal at the discretization stage which may result in
+significant amplification of frequencies near to the nyquist frequency. That's why the
+frequencies above the computed cut-off frequency do not take part in frequency correction
+and are not affected by the inverse impulse response.
+
 There is additional 'mastering' mode provided that allows to swap roles between master and
 child files so the timbral correction becomes applied to child files respective to the
 computed spectral difference of master to the child.
@@ -36,6 +44,7 @@ The example of batch file is the following:
 	"src_path": "/home/user/in",
 	"file": "${group}/${master_name}/${file_name} - processed.wav",
 	"fft_rank": 16,
+	"transition_zone" : 0.5,
 	"produce": [ "ir", "audio", "frm", "frc" ],
 	"dry" : -12,
 	"wet" : 0,
@@ -116,6 +125,7 @@ Here's the full description of all possible parameters which can be omitted in t
     * **raw** - produce raw IR file;
   * **srate** - the sample rate for output files (IR, stripped IR and the processed master files), default 48000;
   * **src_path** - source path to take files from (empty by default);
+  * **transition_zone** - the value of the frequency transition zone (in octaves);
   * **wet** - the loudness of wet (processed) signal in dB in the output audio file, by default 0 dB.
 
 For the **dry**/**wet** balance values below -150 dB are considered as negative infinite gain.
@@ -159,6 +169,7 @@ The tool allows to override some batch parameters by specifying them as command-
   -p, --produce                  Comma-separated list of produced output files (ir,frm,frc,raw,audio,all)
   -s, --src-path                 Source path to take files from
   -sr, --srate                   Sample rate of output files
+  -tz, --transition-zone         The value of the frequency transition zone (in octaves)
   -wg, --wet                     The amount (in dB) of processed signal in output file
 
 ```

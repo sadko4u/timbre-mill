@@ -124,6 +124,6 @@ namespace timbremill
 
         return res;
     }
-}
+} /* namespace timbremill */
 
 

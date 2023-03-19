@@ -2,6 +2,12 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.8 ===
+* Added transition frequency computation for the IR correction which reduces
+  the effect of over-amplification of high frequencies near to the nyquist
+  frequency.
+* Updated dependencies.
+
 === 0.5.7 ===
 * Support of AArch64 and ARMv7 architectures.
 * Better compatibility with Clang compiler.

@@ -115,6 +115,7 @@ namespace timbremill
             ssize_t                                 nFftRank;               // FFT rank
             ssize_t                                 nProduce;               // List of files to produce (flags)
             float                                   fGainRange;             // Gain range (in decibels)
+            float                                   fTransition;            // Transition range in octaves
             float                                   fDry;                   // Amount of dry signal
             float                                   fWet;                   // Amount of wet signal
             bool                                    bMastering;             // 'Mastering' feature

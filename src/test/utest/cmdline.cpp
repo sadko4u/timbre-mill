@@ -39,6 +39,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(cfg->nSampleRate == 88200);
         UTEST_ASSERT(cfg->nFftRank == 8);
         UTEST_ASSERT(cfg->nProduce == (timbremill::OUT_IR | timbremill::OUT_AUDIO));
+        UTEST_ASSERT(float_equals_absolute(cfg->fTransition, 1.5f));
         UTEST_ASSERT(float_equals_absolute(cfg->fDry, -19.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->fWet, -7.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii("/home/user/in"));
@@ -102,6 +103,7 @@ UTEST_BEGIN("timbremill", cmdline)
             "-ng",  "-12",
             "-n",   "ALWAYS",
             "-ml",  "true",
+            "-tz",  "1.5",
             "-c",
             NULL
         };
@@ -156,6 +158,7 @@ UTEST_BEGIN("timbremill", cmdline)
         UTEST_ASSERT(cfg->nSampleRate == 48000);
         UTEST_ASSERT(cfg->nFftRank == 12);
         UTEST_ASSERT(cfg->nProduce == timbremill::OUT_AUDIO);
+        UTEST_ASSERT(float_equals_absolute(cfg->fTransition, 0.5f));
         UTEST_ASSERT(float_equals_absolute(cfg->fDry, -1000.0f));
         UTEST_ASSERT(float_equals_absolute(cfg->fWet, 0.0f));
         UTEST_ASSERT(cfg->sSrcPath.equals_ascii(""));

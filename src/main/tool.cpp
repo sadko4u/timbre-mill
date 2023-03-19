@@ -106,6 +106,9 @@ namespace timbremill
         float dry           = drywet_to_gain(cfg->fDry);
         float wet           = drywet_to_gain(cfg->fWet);
         float ngain         = dspu::db_to_gain(cfg->fNormGain);
+        float transition    = lsp_max(0.0f, cfg->fTransition);
+        size_t master_sr    = 0;        // The original sample rate of the master file
+        size_t child_sr     = 0;        // The original sample rate of the child file
 
         // Analyze group settings
         if (fg->sMaster.is_empty())
@@ -126,7 +129,7 @@ namespace timbremill
         }
 
         // Read the master file
-        if ((res = load_audio_file(&master, cfg->nSampleRate, &cfg->sSrcPath, &fg->sMaster)) != STATUS_OK)
+        if ((res = load_audio_file(&master, &master_sr, cfg->nSampleRate, &cfg->sSrcPath, &fg->sMaster)) != STATUS_OK)
             return res;
 
         // Compute the audio profile for master
@@ -175,12 +178,12 @@ namespace timbremill
             }
 
             // Load the child file
-            if ((res = load_audio_file(&child, cfg->nSampleRate, &cfg->sSrcPath, fname)) != STATUS_OK)
+            if ((res = load_audio_file(&child, &child_sr, cfg->nSampleRate, &cfg->sSrcPath, fname)) != STATUS_OK)
                 return res;
             if (child.channels() != master.channels())
             {
                 fprintf(stderr, "  number of channels mimatch: %d (master) vs %d (child), leaving\n",
-                        int(master.channels()), int(child.channels()));
+                    int(master.channels()), int(child.channels()));
                 return res;
             }
 
@@ -207,8 +210,9 @@ namespace timbremill
             // Compute the impulse response of the file
             src = (cfg->bMastering) ? &mp : &cp;
             dst = (cfg->bMastering) ? &cp : &mp;
+            size_t sr = lsp_min(master_sr, child_sr);
 
-            if ((res = timbre_impulse_response(&raw_ir, dst, src, fft_rank, cfg->fGainRange)) != STATUS_OK)
+            if ((res = timbre_impulse_response(&raw_ir, dst, src, fft_rank, cfg->fGainRange, sr, transition)) != STATUS_OK)
             {
                 fprintf(stderr, "  error computing raw impulse response for the child file '%s'\n", fname->get_native());
                 return res;
@@ -327,4 +331,4 @@ namespace timbremill
 
         return 0;
     }
-}
+} /* namespace timbremill */

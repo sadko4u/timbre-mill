@@ -23,10 +23,11 @@
 #include <lsp-plug.in/stdlib/stdio.h>
 #include <lsp-plug.in/common/alloc.h>
 #include <lsp-plug.in/dsp/dsp.h>
-#include <lsp-plug.in/expr/Expression.h>
 #include <lsp-plug.in/dsp-units/misc/windows.h>
 #include <lsp-plug.in/dsp-units/misc/fade.h>
 #include <lsp-plug.in/dsp-units/util/Convolver.h>
+#include <lsp-plug.in/expr/Expression.h>
+#include <lsp-plug.in/stdlib/math.h>
 
 namespace timbremill
 {
@@ -64,7 +65,7 @@ namespace timbremill
         d->h = duration / 60;
     }
 
-    status_t load_audio_file(dspu::Sample *sample, size_t srate, const LSPString *base, const LSPString *name)
+    status_t load_audio_file(dspu::Sample *sample, size_t *file_srate, size_t srate, const LSPString *base, const LSPString *name)
     {
         status_t res;
         io::Path path;
@@ -94,19 +95,22 @@ namespace timbremill
         duration_t d;
         calc_duration(&d, sample);
         fprintf(stdout, "  loaded file: '%s', channels: %d, samples: %d, sample rate: %d, duration: %02d:%02d:%02d.%03d\n",
-                path.as_native(),
-                int(sample->channels()), int(sample->length()), int(sample->sample_rate()),
-                int(d.h), int(d.m), int(d.s), int(d.ms)
-        );
+            path.as_native(),
+            int(sample->channels()), int(sample->length()), int(sample->sample_rate()),
+            int(d.h), int(d.m), int(d.s), int(d.ms));
 
         // Resample audio data
+        size_t sample_rate = sample->sample_rate();
         if ((res = sample->resample(srate)) != STATUS_OK)
         {
             fprintf(stderr, "  could not resample file '%s' to sample rate %d, error code: %d\n",
-                    path.as_native(), int(srate), int(res)
-            );
+                path.as_native(), int(srate), int(res));
             return res;
         }
+
+        // Return result
+        if (file_srate != NULL)
+            *file_srate = sample_rate;
 
         return STATUS_OK;
     }
@@ -281,6 +285,7 @@ namespace timbremill
         }
 
         // Release allocated data and return result
+        out.set_sample_rate(src->sample_rate());
         profile->swap(&out);
         free_aligned(ptr);
 
@@ -290,7 +295,8 @@ namespace timbremill
     status_t timbre_impulse_response(
         dspu::Sample *dst,
         const dspu::Sample *master, const dspu::Sample *child,
-        size_t precision, float db_range)
+        size_t precision, float db_range, size_t sample_rate,
+        float transition)
     {
         dspu::Sample out;
         status_t res;
@@ -328,12 +334,19 @@ namespace timbremill
             return STATUS_NO_MEM;
 
         dspu::windows::blackman_nuttall(wnd, bins);
+        sample_rate         = lsp_min(sample_rate, master->sample_rate());
+        size_t fft_length   = out.samples();
+        float kt            = expf(log(0.5f) * (1.0f + transition));
+        size_t pass         = fft_length * (kt * float(sample_rate)/float(master->sample_rate()));
 
         // Make impulse response for each channel
         for (size_t i=0, n=out.channels(); i<n; ++i)
         {
-            float *chan = out.channel(i);
-            dsp::div2(chan, master->channel(i), out.samples());     // Compute reverse specrum characterisic
+            const float *mchan  = master->channel(i);
+            float *chan         = out.channel(i);
+
+            dsp::div2(chan, mchan, fft_length);                     // Compute reverse specrum characterisic
+            dsp::fill_one(&chan[pass], fft_length-pass*2);          // Do not touch frequencies above the pass
 
             dsp::pcomplex_r2c(fft, chan, bins);                     // Prepare the FFT buffer with zero phase
             dsp::packed_reverse_fft(fft, fft, precision);           // Perform reverse FFT
@@ -540,6 +553,6 @@ namespace timbremill
 
         dst->set_length(length);
     }
-}
+} /* namespace timbremill */
 
 

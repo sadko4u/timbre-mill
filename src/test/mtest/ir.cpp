@@ -35,23 +35,24 @@ MTEST_BEGIN("timbremill", ir)
         lsp::dspu::Sample s, pu, pp, ir;
         LSPString base, name;
         io::Path out;
+        size_t master_sr = 0, child_sr = 0;
 
         // Load the 'unmuted' audio file and compute spectral profile
         MTEST_ASSERT(base.set_native(resources()));
         MTEST_ASSERT(name.set_ascii("samples/trumpet/trp unmuted.wav"));
-        MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
+        MTEST_ASSERT(timbremill::load_audio_file(&s, &master_sr, SAMPLE_RATE, &base, &name) == STATUS_OK);
         MTEST_ASSERT(timbremill::spectral_profile(&pu, &s, FFT_PRECISION) == STATUS_OK);
 
         // Load the 'plunger' audio file and compute spectral profile
         MTEST_ASSERT(base.set_native(resources()));
         MTEST_ASSERT(name.set_ascii("samples/trumpet/trp plunger.wav"));
-        MTEST_ASSERT(timbremill::load_audio_file(&s, SAMPLE_RATE, &base, &name) == STATUS_OK);
+        MTEST_ASSERT(timbremill::load_audio_file(&s, &child_sr, SAMPLE_RATE, &base, &name) == STATUS_OK);
         MTEST_ASSERT(timbremill::spectral_profile(&pp, &s, FFT_PRECISION) == STATUS_OK);
 
         // Compute the impulse response
         MTEST_ASSERT(pu.channels() == pp.channels());
         MTEST_ASSERT(pu.length() == pp.length());
-        MTEST_ASSERT(timbremill::timbre_impulse_response(&ir, &pu, &pp, FFT_PRECISION, 48.0f) == STATUS_OK);
+        MTEST_ASSERT(timbremill::timbre_impulse_response(&ir, &pu, &pp, FFT_PRECISION, 48.0f, lsp_min(master_sr, child_sr), 0.5f) == STATUS_OK);
 
         // Save the impulse response
         MTEST_ASSERT(out.fmt("%s/%s-ir.wav", tempdir(), full_name()) > 0);
