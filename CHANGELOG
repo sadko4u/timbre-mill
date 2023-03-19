@@ -2,6 +2,8 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 0.5.9 ===
+
 === 0.5.8 ===
 * Added transition frequency computation for the IR correction which reduces
   the effect of over-amplification of high frequencies near to the nyquist

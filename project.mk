@@ -22,4 +22,4 @@
 ARTIFACT_ID                 = TIMBRE_MILL
 ARTIFACT_NAME               = timbre-mill
 ARTIFACT_DESC               = Timbre Mill - a tool for IR timbre correction
-ARTIFACT_VERSION            = 0.5.8
+ARTIFACT_VERSION            = 0.5.9-devel
