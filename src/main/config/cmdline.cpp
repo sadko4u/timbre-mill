@@ -49,7 +49,7 @@ namespace timbremill
         "-ifo", "--ir-fade-out",            "The amount (in %) of fade-out for the IR file",
         "-ihc", "--ir-head-cut",            "The amount (in %) of head cut for the IR file",
         "-itc", "--ir-tail-cut",            "The amount (in %) of tail cut for the IR file",
-        "-lc",  "--latency-compensation",   "The amount (in %) of tail cut for the IR file",
+        "-lc",  "--latency-compensation",   "Compensate the latency caused by IR of the linear-phased filter",
         "-m",   "--mastering",              "Work as auto-mastering tool instead of timbral correction",
         "-mf",  "--master",                 "The name of the master file",
         "-ml",  "--match-length",           "Match the length of the output file to the input file",
